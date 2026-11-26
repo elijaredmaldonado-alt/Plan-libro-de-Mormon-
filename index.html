@@ -1,0 +1,2759 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>El Libro de Mormón • 60 Días</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            display: ['"Cinzel"', 'serif'],
+          },
+          colors: {
+            warmbg: '#FAF7F2',
+            cream: '#F2ECE1',
+            sand: '#E6DEC8',
+            jade: {
+              DEFAULT: '#0E7C7B',
+              light: '#17A398',
+              dark: '#085352',
+              soft: '#E3F4F3'
+            },
+            gold: {
+              DEFAULT: '#C8963E',
+              light: '#E3B866',
+              dark: '#9A6F22',
+              soft: '#FBF4E6'
+            },
+            terracotta: {
+              DEFAULT: '#C85A32',
+              light: '#E07A55',
+              soft: '#FBECE6'
+            },
+            deepblue: {
+              DEFAULT: '#1B365D',
+              light: '#2C528A',
+              soft: '#EBF0F7'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Barra superior limpia */
+    .ancient-border-top {
+      background: linear-gradient(90deg, #0E7C7B 0%, #C8963E 50%, #C85A32 100%);
+      height: 3px;
+    }
+
+    /* Superficies amplias y sin bordes anidados */
+    .clean-surface {
+      background-color: #FFFFFF;
+      box-shadow: 0 8px 30px -6px rgba(27, 54, 93, 0.06);
+    }
+
+    /* Animaciones suaves */
+    @keyframes floatSlow {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-4px); }
+    }
+    .animate-float {
+      animation: floatSlow 3s ease-in-out infinite;
+    }
+
+    @keyframes pulseRing {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(200, 150, 62, 0.45); }
+      70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(200, 150, 62, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(200, 150, 62, 0); }
+    }
+    .active-tile-pulse {
+      animation: pulseRing 2.2s infinite;
+    }
+
+    /* Ocultar scrollbar en navegación horizontal */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* Soporte Safe Area para iPhone y dispositivos modernos */
+    .pb-safe {
+      padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+    }
+    .pt-safe {
+      padding-top: env(safe-area-inset-top);
+    }
+
+    /* Mejora táctil en iOS / Android */
+    button, a {
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+  </style>
+</head>
+<body class="bg-warmbg text-deepblue antialiased selection:bg-jade selection:text-white min-h-screen flex flex-col">
+
+  <!-- Barra superior sutil -->
+  <div class="ancient-border-top w-full sticky top-0 z-50"></div>
+
+  <!-- Notificación Toast Flotante -->
+  <div id="toast-container" class="fixed top-4 right-4 left-4 sm:left-auto sm:w-96 z-50 pointer-events-none flex flex-col gap-2"></div>
+
+  <!-- =====================================================================
+       VISTA 1: PANTALLA DE ACCESO MINIMALISTA (INICIAR SESIÓN / CREAR CUENTA)
+  ====================================================================== -->
+  <section id="auth-view" class="hidden flex-1 flex flex-col justify-center items-center p-5 sm:p-8 max-w-md mx-auto w-full">
+    <div class="w-full clean-surface rounded-3xl p-7 sm:p-9 bg-white">
+      
+      <!-- Encabezado Minimalista -->
+      <div class="text-center mb-8">
+        <div id="welcome-emblem-trigger" class="relative overflow-hidden inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-warmbg mb-4 select-none cursor-pointer">
+          <div id="emblem-hold-fill" class="absolute inset-x-0 bottom-0 h-0 opacity-30 pointer-events-none"
+            style="background: linear-gradient(0deg, #0E7C7B, #C8963E, #C85A32);"></div>
+          <div id="welcome-emblem" class="relative z-10 w-11 h-11 pointer-events-none"></div>
+        </div>
+        <h1 class="font-display text-2xl sm:text-3xl font-bold text-deepblue tracking-tight">El Libro de Mormón</h1>
+      </div>
+
+      <!-- PASO 0: Selector Inicial (Iniciar Sesión o Crear Cuenta) -->
+      <div id="auth-choice-step" class="space-y-4">
+        <button type="button" id="btn-go-login"
+          class="w-full min-h-[54px] py-3.5 px-6 rounded-2xl bg-jade hover:bg-jade-dark text-white font-bold text-base shadow-md shadow-jade/20 transition transform active:scale-[0.98] flex items-center justify-center gap-2 select-none">
+          <span>Iniciar Sesión</span>
+        </button>
+
+        <button type="button" id="btn-go-register"
+          class="w-full min-h-[54px] py-3.5 px-6 rounded-2xl bg-warmbg hover:bg-cream text-deepblue font-bold text-base transition transform active:scale-[0.98] flex items-center justify-center gap-2">
+          <span>Crear Cuenta</span>
+        </button>
+      </div>
+
+      <!-- PASO SECRETO ANFITRIÓN: Configurar o Iniciar Sesión como Anfitrión -->
+      <form id="host-login-form" class="hidden space-y-5">
+        <div class="flex items-center justify-between mb-1">
+          <span class="text-xs font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full bg-gold-soft text-gold-dark">Acceso Anfitrión</span>
+          <button type="button" class="btn-back-choice text-xs font-bold text-jade hover:underline py-1.5 px-2">← Volver</button>
+        </div>
+
+        <div>
+          <h2 id="host-form-title" class="text-lg font-bold text-deepblue">Inicia sesión como anfitrión</h2>
+          <p id="host-form-subtitle" class="text-xs text-deepblue/65 mt-0.5">Ingresa tu código secreto de anfitrión.</p>
+        </div>
+
+        <div>
+          <label for="host-pin-input" class="block text-xs font-bold text-deepblue/70 mb-1.5">Código de Anfitrión (4 a 6 dígitos)</label>
+          <input type="password" id="host-pin-input" required pattern="[0-9]{4,6}" inputmode="numeric" maxlength="6" placeholder="••••"
+            class="w-full min-h-[52px] px-4 py-3 rounded-2xl bg-warmbg focus:bg-white focus:ring-2 focus:ring-gold/40 outline-none text-center tracking-[0.5em] font-bold text-xl transition">
+        </div>
+
+        <button type="submit" id="host-submit-btn"
+          class="w-full min-h-[54px] py-3.5 px-6 rounded-2xl bg-deepblue hover:bg-deepblue-light text-white font-bold text-base shadow-md transition transform active:scale-[0.98]">
+          Entrar al Panel
+        </button>
+      </form>
+
+      <!-- PASO A: Formulario Iniciar Sesión (Nombre + PIN) -->
+      <form id="login-form" class="hidden space-y-5">
+        <div class="flex items-center justify-between mb-1">
+          <h2 class="text-lg font-bold text-deepblue">Iniciar Sesión</h2>
+          <button type="button" class="btn-back-choice text-xs font-bold text-jade hover:underline py-1.5 px-2">← Volver</button>
+        </div>
+
+        <div>
+          <label for="login-name" class="block text-xs font-bold text-deepblue/70 mb-1.5">Nombre o Apodo</label>
+          <input type="text" id="login-name" required autocomplete="username" placeholder="Tu nombre o apodo"
+            class="w-full min-h-[50px] px-4 py-3 rounded-2xl bg-warmbg focus:bg-white focus:ring-2 focus:ring-jade/30 outline-none text-base transition">
+        </div>
+
+        <div>
+          <label for="login-pin" class="block text-xs font-bold text-deepblue/70 mb-1.5">PIN (4 dígitos)</label>
+          <input type="password" id="login-pin" required pattern="[0-9]{4}" inputmode="numeric" maxlength="4" placeholder="••••"
+            class="w-full min-h-[52px] px-4 py-3 rounded-2xl bg-warmbg focus:bg-white focus:ring-2 focus:ring-jade/30 outline-none text-center tracking-[0.6em] font-bold text-xl transition">
+        </div>
+
+        <button type="submit"
+          class="w-full min-h-[54px] py-3.5 px-6 rounded-2xl bg-jade hover:bg-jade-dark text-white font-bold text-base shadow-md shadow-jade/20 transition transform active:scale-[0.98]">
+          Entrar
+        </button>
+
+        <div class="pt-1 text-center">
+          <a id="btn-forgot-pin-wa"
+            href="https://wa.me/522217201158?text=Hola%2C%20olvid%C3%A9%20mi%20PIN%20o%20nombre%20de%20la%20aplicaci%C3%B3n%2C%20%C2%BFme%20puedes%20ayudar%3F"
+            target="_blank" rel="noopener noreferrer"
+            class="inline-flex items-center justify-center gap-1.5 py-2.5 px-4 rounded-xl text-xs font-bold text-deepblue/70 hover:text-jade hover:bg-warmbg transition">
+            <span>Olvidé mi contraseña</span>
+          </a>
+        </div>
+      </form>
+
+      <!-- PASO B1: Crear Cuenta - Datos Personales -->
+      <form id="register-step1-form" class="hidden space-y-5">
+        <div class="flex items-center justify-between mb-1">
+          <h2 class="text-lg font-bold text-deepblue">Crear Cuenta</h2>
+          <button type="button" class="btn-back-choice text-xs font-bold text-jade hover:underline py-1.5 px-2">← Volver</button>
+        </div>
+
+        <div>
+          <label for="reg-name" class="block text-xs font-bold text-deepblue/70 mb-1.5">Nombre</label>
+          <input type="text" id="reg-name" required placeholder="Ej. Lehi Mendoza"
+            class="w-full min-h-[50px] px-4 py-3 rounded-2xl bg-warmbg focus:bg-white focus:ring-2 focus:ring-jade/30 outline-none text-base transition">
+        </div>
+
+        <div>
+          <label for="reg-nickname" class="block text-xs font-bold text-deepblue/70 mb-1.5">Apodo</label>
+          <input type="text" id="reg-nickname" required maxlength="14" placeholder="Ej. Nefi"
+            class="w-full min-h-[50px] px-4 py-3 rounded-2xl bg-warmbg focus:bg-white focus:ring-2 focus:ring-jade/30 outline-none text-base transition">
+        </div>
+
+        <div>
+          <label for="reg-pin" class="block text-xs font-bold text-deepblue/70 mb-1.5">Código PIN (4 dígitos)</label>
+          <input type="password" id="reg-pin" required pattern="[0-9]{4}" inputmode="numeric" maxlength="4" placeholder="••••"
+            class="w-full min-h-[52px] px-4 py-3 rounded-2xl bg-warmbg focus:bg-white focus:ring-2 focus:ring-jade/30 outline-none text-center tracking-[0.6em] font-bold text-xl transition">
+        </div>
+
+        <button type="submit"
+          class="w-full min-h-[54px] py-3.5 px-6 rounded-2xl bg-jade hover:bg-jade-dark text-white font-bold text-base shadow-md shadow-jade/20 transition transform active:scale-[0.98]">
+          Continuar
+        </button>
+      </form>
+
+      <!-- PASO B2: Crear Cuenta - Elegir Icono (Pantalla dedicada tras llenar datos) -->
+      <div id="register-step2-avatar" class="hidden space-y-5">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-lg font-bold text-deepblue">Elige un Icono</h2>
+            <p id="selected-avatar-name" class="text-xs font-bold text-jade mt-0.5">La Liahona</p>
+          </div>
+          <button type="button" id="btn-back-step1" class="text-xs font-bold text-deepblue/60 hover:text-deepblue py-1.5 px-3 rounded-xl bg-warmbg">← Atrás</button>
+        </div>
+
+        <div id="avatar-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-3 p-3.5 rounded-2xl bg-warmbg max-h-80 overflow-y-auto">
+          <!-- Generado dinámicamente por JS (solo iconos disponibles) -->
+        </div>
+
+        <button type="button" id="btn-finish-register"
+          class="w-full min-h-[54px] py-3.5 px-6 rounded-2xl bg-jade hover:bg-jade-dark text-white font-bold text-base shadow-md shadow-jade/20 transition transform active:scale-[0.98]">
+          Finalizar y Entrar
+        </button>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       VISTA 2: APLICACIÓN PRINCIPAL (DISEÑO LIBRE, ESPACIOSO Y SIN BORDES DOBLES)
+  ====================================================================== -->
+  <div id="app-view" class="hidden flex-1 flex flex-col pb-28 sm:pb-12">
+
+    <!-- Header Principal Limpio -->
+    <header class="bg-warmbg/90 backdrop-blur-md sticky top-[3px] z-40">
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between gap-3">
+        <!-- Perfil Activo -->
+        <div class="flex items-center gap-3 min-w-0">
+          <div id="header-avatar" class="w-12 h-12 rounded-2xl bg-white shadow-xs p-1.5 shrink-0"></div>
+          <div class="min-w-0">
+            <div class="flex items-center gap-2">
+              <h1 id="header-nickname" class="font-bold text-deepblue text-base sm:text-lg truncate">Viajero</h1>
+              <span id="header-day-badge" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-jade/12 text-jade">Día 1</span>
+            </div>
+            <p id="header-avatar-title" class="text-xs text-deepblue/55 truncate">La Liahona</p>
+          </div>
+        </div>
+
+        <!-- Navegación Desktop -->
+        <nav class="hidden sm:flex items-center bg-white/80 p-1.5 rounded-2xl shadow-xs gap-1">
+          <button data-tab="board" class="nav-tab-btn min-h-[42px] px-5 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2">
+            <span>Tablero</span>
+          </button>
+          <button data-tab="plan" class="nav-tab-btn min-h-[42px] px-5 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2">
+            <span>Plan 60 Días</span>
+          </button>
+          <button data-tab="journal" class="nav-tab-btn min-h-[42px] px-5 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2">
+            <span>Bitácora</span>
+          </button>
+          <button id="desktop-host-nav-btn" data-tab="host" class="nav-tab-btn hidden min-h-[42px] px-5 py-2 rounded-xl text-sm font-bold transition items-center gap-2">
+            <span>Anfitrión</span>
+            <span id="desktop-host-badge" class="hidden px-2 py-0.5 text-[10px] font-extrabold rounded-full bg-terracotta text-white">0</span>
+          </button>
+        </nav>
+
+        <!-- Botón Salir / Cambiar Cuenta -->
+        <button id="switch-user-btn" title="Cerrar sesión o cambiar cuenta"
+          class="min-h-[44px] px-4 py-2 rounded-2xl bg-white hover:bg-cream shadow-xs text-xs sm:text-sm font-bold text-deepblue/80 flex items-center gap-1.5 shrink-0 transition">
+          <svg class="w-4 h-4 text-terracotta" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+          </svg>
+          <span>Salir</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Panel Superior de Métricas: Círculo de Porcentaje + Fueguito Racha + Escudos + Recta de Avance -->
+    <div class="max-w-5xl mx-auto w-full px-4 sm:px-6 pt-2 space-y-5">
+      
+      <!-- Fila 1: Progreso Circular + Racha (Fueguito) + Escudos -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        
+        <!-- 1. Círculo de Porcentaje Total del Libro -->
+        <div class="clean-surface rounded-3xl p-4 sm:p-5 flex items-center gap-4">
+          <div class="relative w-16 h-16 shrink-0 flex items-center justify-center">
+            <svg class="w-16 h-16 -rotate-90" viewBox="0 0 64 64">
+              <circle cx="32" cy="32" r="26" fill="none" stroke="#F2ECE1" stroke-width="6" />
+              <circle id="progress-ring-circle" cx="32" cy="32" r="26" fill="none" stroke="#0E7C7B" stroke-width="6"
+                stroke-linecap="round" stroke-dasharray="163.36" stroke-dashoffset="163.36"
+                class="transition-all duration-700 ease-out" />
+            </svg>
+            <span id="metric-chapters-pct" class="absolute text-sm font-extrabold text-deepblue">0%</span>
+          </div>
+          <div>
+            <div class="text-xs font-semibold text-deepblue/55">Avance del Libro</div>
+            <div class="text-lg font-extrabold text-deepblue leading-tight mt-0.5">
+              <span id="metric-chapters">0</span> <span class="text-xs font-semibold text-deepblue/55">/ 239 cap.</span>
+            </div>
+            <div class="text-xs font-bold text-jade mt-0.5"><span id="metric-days">0</span> de 60 días</div>
+          </div>
+        </div>
+
+        <!-- 2. Racha Actual (Fueguito gris si no se ha leído hoy; amarillo/rojo al completar hoy) -->
+        <div id="streak-card" class="clean-surface rounded-3xl p-4 sm:p-5 flex items-center gap-4 transition-colors">
+          <div id="streak-icon-container" class="w-14 h-14 rounded-2xl bg-warmbg p-2 shrink-0 flex items-center justify-center"></div>
+          <div>
+            <div class="text-xs font-semibold text-deepblue/55">Racha Diaria</div>
+            <div id="streak-value-text" class="text-2xl font-extrabold text-deepblue/45 leading-tight mt-0.5">
+              <span id="metric-streak">0</span> <span class="text-xs font-bold">días</span>
+            </div>
+            <div id="streak-status-label" class="text-[11px] font-semibold text-deepblue/50 mt-0.5">Pendiente hoy</div>
+          </div>
+        </div>
+
+        <!-- 3. Escudos de Protección (1 por semana, máx 2, automáticos) -->
+        <div class="clean-surface rounded-3xl p-4 sm:p-5 flex items-center gap-4">
+          <div id="shield-icon-container" class="w-14 h-14 rounded-2xl bg-gold-soft/60 p-2 shrink-0 flex items-center justify-center"></div>
+          <div>
+            <div class="text-xs font-semibold text-deepblue/55">Escudos</div>
+            <div class="text-2xl font-extrabold text-gold-dark leading-tight mt-0.5">
+              <span id="metric-shields">1</span> <span class="text-xs font-bold text-deepblue/50">/ 2</span>
+            </div>
+            <div class="text-[11px] font-semibold text-deepblue/50 mt-0.5">Protección automática</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Fila 2: Recta Comparativa con Palitos y Avatares de Todos los Lectores -->
+      <div class="clean-surface rounded-3xl p-5 sm:p-6">
+        <div class="flex items-center justify-between mb-6">
+          <span class="text-xs font-bold text-deepblue/70">Recta de Progreso</span>
+          <span class="text-[11px] font-semibold text-deepblue/45">0% → 50% → 100%</span>
+        </div>
+
+        <!-- Contenedor de la recta y marcadores con palito -->
+        <div class="relative pt-9 pb-2 px-3">
+          <!-- Capa de avatares con palito vertical -->
+          <div id="progress-track-markers" class="relative h-10 w-full"></div>
+
+          <!-- Línea base de la recta -->
+          <div class="relative h-2.5 w-full bg-cream rounded-full overflow-hidden">
+            <div id="my-track-fill" class="h-full bg-gradient-to-r from-jade to-gold rounded-full transition-all duration-700" style="width: 0%"></div>
+          </div>
+
+          <!-- Marcas de referencia (Inicio, Mitad, Meta) -->
+          <div class="flex justify-between text-[10px] font-bold text-deepblue/40 mt-2">
+            <span>1 Nefi 1</span>
+            <span>Alma 30 (50%)</span>
+            <span>Moroni 10</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ===================================================================
+         CONTENIDO PESTAÑA 1: TABLERO LIBRE Y ESPACIOSO (CAMINO SINUOSO)
+    ==================================================================== -->
+    <main id="tab-board" class="tab-content max-w-5xl mx-auto w-full px-4 sm:px-6 pt-6 space-y-5">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-1">
+        <div>
+          <h2 class="font-display text-xl font-bold text-deepblue">Tablero</h2>
+        </div>
+        <div class="flex items-center gap-4 text-xs font-semibold text-deepblue/65">
+          <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-jade inline-block"></span> Leído</span>
+          <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-gold inline-block"></span> Hoy</span>
+          <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-terracotta inline-block"></span> Hito</span>
+        </div>
+      </div>
+
+      <!-- Recorrido Abierto sin encierros ni amontonamiento -->
+      <div id="open-journey-board" class="relative py-4 px-2 sm:px-6">
+        <!-- Generado dinámicamente en filas sinuosas amplias -->
+      </div>
+    </main>
+
+    <!-- ===================================================================
+         CONTENIDO PESTAÑA 2: PLAN DE ESTUDIO (60 DÍAS)
+    ==================================================================== -->
+    <main id="tab-plan" class="tab-content hidden max-w-5xl mx-auto w-full px-4 sm:px-6 pt-6 space-y-5">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-1">
+        <div>
+          <h2 class="font-display text-xl font-bold text-deepblue">Plan de Estudio</h2>
+        </div>
+
+        <!-- Filtros rápidos de días -->
+        <div class="flex items-center gap-1.5 bg-white p-1.5 rounded-2xl shadow-xs self-start">
+          <button data-filter="all" class="plan-filter-btn min-h-[40px] px-4 py-1.5 rounded-xl text-xs font-bold bg-warmbg text-deepblue">Todos (60)</button>
+          <button data-filter="pending" class="plan-filter-btn min-h-[40px] px-4 py-1.5 rounded-xl text-xs font-semibold text-deepblue/60">Pendientes</button>
+          <button data-filter="completed" class="plan-filter-btn min-h-[40px] px-4 py-1.5 rounded-xl text-xs font-semibold text-deepblue/60">Completados</button>
+        </div>
+      </div>
+
+      <!-- Lista de Tarjetas de los 60 Días -->
+      <div id="study-plan-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Generado dinámicamente -->
+      </div>
+    </main>
+
+    <!-- ===================================================================
+         CONTENIDO PESTAÑA 3: BITÁCORA DE REFLEXIONES
+    ==================================================================== -->
+    <main id="tab-journal" class="tab-content hidden max-w-5xl mx-auto w-full px-4 sm:px-6 pt-6 space-y-5">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-1">
+        <div>
+          <h2 class="font-display text-xl font-bold text-deepblue">Bitácora</h2>
+        </div>
+        <div class="flex items-center gap-1.5 bg-white p-1.5 rounded-2xl shadow-xs self-start">
+          <button data-jfilter="mine" class="journal-filter-btn min-h-[40px] px-4 py-1.5 rounded-xl text-xs font-bold bg-warmbg text-deepblue">Mi Bitácora</button>
+          <button data-jfilter="community" class="journal-filter-btn min-h-[40px] px-4 py-1.5 rounded-xl text-xs font-semibold text-deepblue/60">Muro Comunitario</button>
+        </div>
+      </div>
+
+      <div id="journal-entries-list" class="space-y-4">
+        <!-- Entradas de bitácora generadas dinámicamente -->
+      </div>
+    </main>
+
+    <!-- ===================================================================
+         CONTENIDO PESTAÑA 4: PANEL EXCLUSIVO DEL ANFITRIÓN
+    ==================================================================== -->
+    <main id="tab-host" class="tab-content hidden max-w-5xl mx-auto w-full px-4 sm:px-6 pt-6 space-y-5">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-1">
+        <div>
+          <h2 class="font-display text-xl font-bold text-deepblue">Anfitrión</h2>
+        </div>
+        <button type="button" id="btn-mark-host-read"
+          class="min-h-[42px] px-4 py-2 rounded-2xl bg-white hover:bg-cream shadow-xs text-xs font-bold text-jade self-start transition">
+          Marcar vistas
+        </button>
+      </div>
+
+      <!-- Resumen de Jugadores -->
+      <div id="host-players-summary" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+
+      <!-- Configuración de Número de WhatsApp para Recuperación de PIN -->
+      <div class="clean-surface rounded-3xl p-5 sm:p-6 bg-white flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div class="flex-1">
+          <label for="host-wa-number-input" class="block text-xs font-extrabold uppercase tracking-wider text-deepblue/60 mb-1.5">
+            WhatsApp de Recuperación
+          </label>
+          <input type="tel" id="host-wa-number-input" inputmode="numeric" maxlength="15" placeholder="2217201158"
+            class="w-full sm:max-w-xs min-h-[46px] px-4 py-2.5 rounded-2xl bg-warmbg focus:bg-white focus:ring-2 focus:ring-jade/30 outline-none text-sm font-bold text-deepblue transition">
+        </div>
+        <button type="button" id="btn-save-host-wa"
+          class="min-h-[46px] px-5 py-2.5 rounded-2xl bg-jade hover:bg-jade-dark text-white text-xs sm:text-sm font-bold transition shrink-0">
+          Guardar
+        </button>
+      </div>
+
+      <!-- Moderación de Bitácoras -->
+      <div class="space-y-3">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-deepblue/55 px-1">Bitácoras Publicadas</h3>
+        <div id="host-journal-moderation-list" class="space-y-3"></div>
+      </div>
+
+      <!-- Feed de Notificaciones del Anfitrión -->
+      <div class="space-y-3">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-deepblue/55 px-1">Notificaciones</h3>
+        <div id="host-notifications-list" class="space-y-3"></div>
+      </div>
+    </main>
+
+    <!-- Barra de Navegación Inferior Fija para Móviles / iPhone -->
+    <nav class="sm:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md z-40 px-3 pt-2 pb-safe flex justify-around items-center gap-2 shadow-[0_-6px_25px_rgba(27,54,93,0.08)]">
+      <button data-tab="board" class="mobile-nav-btn flex-1 min-h-[52px] py-2 flex flex-col items-center justify-center gap-1 rounded-2xl transition">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
+        <span class="text-xs font-bold">Tablero</span>
+      </button>
+      <button data-tab="plan" class="mobile-nav-btn flex-1 min-h-[52px] py-2 flex flex-col items-center justify-center gap-1 rounded-2xl transition">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+        <span class="text-xs font-bold">Plan</span>
+      </button>
+      <button data-tab="journal" class="mobile-nav-btn flex-1 min-h-[52px] py-2 flex flex-col items-center justify-center gap-1 rounded-2xl transition">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+        <span class="text-xs font-bold">Bitácora</span>
+      </button>
+      <button id="mobile-host-nav-btn" data-tab="host" class="mobile-nav-btn hidden relative flex-1 min-h-[52px] py-2 flex flex-col items-center justify-center gap-1 rounded-2xl transition">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+        <span class="text-xs font-bold">Anfitrión</span>
+        <span id="mobile-host-badge" class="hidden absolute top-1.5 right-3 px-1.5 py-0.2 text-[9px] font-extrabold rounded-full bg-terracotta text-white">0</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- =====================================================================
+       MODAL DE COFRES Y PREMIOS ESPECIALES (COFRE CADA 5 LECCIONES, ANILLO HJ, ACEITERO)
+  ====================================================================== -->
+  <div id="reward-modal" class="hidden fixed inset-0 z-50 bg-deepblue/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-6 sm:p-7 shadow-2xl text-center relative overflow-hidden">
+      <div class="ancient-border-top absolute top-0 left-0 right-0"></div>
+
+      <span id="reward-badge" class="inline-block text-xs font-extrabold uppercase tracking-wider px-3 py-1 rounded-full bg-gold-soft text-gold-dark mt-1 mb-3">
+        Cofre Misterioso
+      </span>
+
+      <h3 id="reward-title" class="font-display font-bold text-xl text-deepblue mb-2">¡Has encontrado un cofre!</h3>
+      <p id="reward-subtitle" class="text-xs sm:text-sm text-deepblue/75 mb-4 leading-relaxed">
+        Toca el cofre para descubrir si contiene una recompensa especial.
+      </p>
+
+      <!-- Contenedor Visual del Cofre o Imagen del Premio -->
+      <div id="reward-visual-box" class="w-44 h-44 mx-auto rounded-3xl bg-warmbg flex items-center justify-center p-4 mb-5 shadow-inner transition-transform">
+        <!-- SVG del cofre o imagen del anillo / aceitero -->
+      </div>
+
+      <div class="flex flex-col gap-2.5">
+        <button type="button" id="btn-reward-primary"
+          class="w-full min-h-[50px] py-3 px-5 rounded-2xl bg-gold hover:bg-gold-dark text-white font-bold text-sm shadow-md transition">
+          Abrir Cofre
+        </button>
+        <button type="button" id="btn-reward-close"
+          class="hidden w-full min-h-[48px] py-3 px-5 rounded-2xl bg-jade hover:bg-jade-dark text-white font-bold text-sm transition">
+          Continuar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       MODAL DE REFLEXIÓN AL COMPLETAR UN DÍA
+  ====================================================================== -->
+  <div id="reflection-modal" class="hidden fixed inset-0 z-50 bg-deepblue/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl relative overflow-hidden">
+      <div class="ancient-border-top absolute top-0 left-0 right-0"></div>
+      <div class="flex items-center gap-3 mb-3 mt-1">
+        <div class="w-11 h-11 rounded-2xl bg-jade-soft text-jade flex items-center justify-center shrink-0">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+        </div>
+        <div>
+          <span id="modal-day-label" class="text-xs font-bold uppercase tracking-wider text-gold-dark">Día 1 Completado</span>
+          <h3 id="modal-scripture-label" class="font-bold text-base text-deepblue">1 Nefi 1 – 1 Nefi 4</h3>
+        </div>
+      </div>
+
+      <p class="text-sm font-semibold text-deepblue/90 mb-2">¿Qué aprendiste o qué impresión tuviste hoy?</p>
+      <textarea id="reflection-textarea" rows="4" placeholder="Escribe un versículo, una enseñanza o una impresión personal (opcional)..."
+        class="w-full p-3.5 rounded-2xl bg-warmbg focus:bg-white focus:ring-2 focus:ring-jade/30 outline-none text-base sm:text-sm resize-none"></textarea>
+
+      <label class="flex items-center gap-3 mt-3 py-1 cursor-pointer select-none">
+        <input type="checkbox" id="reflection-share-check" class="w-5 h-5 rounded accent-jade">
+        <span class="text-xs sm:text-sm text-deepblue/80 font-medium">Compartir en el Muro Comunitario</span>
+      </label>
+
+      <div class="mt-5 flex flex-col sm:flex-row gap-2.5">
+        <button type="button" id="skip-reflection-btn"
+          class="flex-1 min-h-[48px] py-3 px-4 rounded-2xl bg-warmbg hover:bg-cream text-deepblue/75 text-xs sm:text-sm font-bold transition">
+          Saltar por ahora
+        </button>
+        <button type="button" id="save-reflection-btn"
+          class="flex-1 min-h-[48px] py-3 px-4 rounded-2xl bg-jade hover:bg-jade-dark text-white text-xs sm:text-sm font-bold shadow-md transition">
+          Guardar Reflexión
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Detalle Rápido de Casilla del Tablero -->
+  <div id="tile-detail-modal" class="hidden fixed inset-0 z-50 bg-deepblue/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-6 sm:p-7 shadow-2xl">
+      <div class="flex justify-between items-start mb-2">
+        <span id="tile-modal-badge" class="text-xs font-bold px-3 py-1 rounded-full bg-gold-soft text-gold-dark">Día 1</span>
+        <button id="close-tile-modal" class="min-w-[36px] min-h-[36px] flex items-center justify-center rounded-xl bg-warmbg text-deepblue/60 hover:text-deepblue">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <h3 id="tile-modal-title" class="font-display font-bold text-lg text-deepblue">1 Nefi 1 – 1 Nefi 4</h3>
+      <p id="tile-modal-context" class="text-xs sm:text-sm text-deepblue/75 mt-1.5 leading-relaxed"></p>
+      
+      <!-- Banner de Premio Especial en Casilla 30 (Mitad) o Casilla 60 (Meta) -->
+      <div id="tile-modal-prize-box" class="hidden mt-3.5 p-3.5 rounded-2xl bg-gold-soft/70 flex items-center justify-between gap-3">
+        <div>
+          <p class="text-[11px] font-extrabold uppercase text-gold-dark">Recompensa Especial</p>
+          <p id="tile-modal-prize-name" class="text-xs font-bold text-deepblue">Anillo de Hombres Jóvenes</p>
+        </div>
+        <button type="button" id="tile-modal-view-prize-btn"
+          class="min-h-[38px] px-3.5 py-1.5 rounded-xl bg-gold text-white text-xs font-bold hover:bg-gold-dark transition shrink-0">
+          Visualizar
+        </button>
+      </div>
+
+      <div id="tile-modal-players" class="mt-3 pt-3 hidden">
+        <p class="text-[11px] font-bold text-deepblue/55 uppercase mb-1.5">En esta casilla:</p>
+        <div id="tile-modal-players-list" class="flex flex-wrap gap-1.5"></div>
+      </div>
+      <div class="mt-5 flex flex-col sm:flex-row gap-2.5">
+        <a id="tile-modal-read-link" href="#" target="_blank" rel="noopener noreferrer"
+          class="flex-1 min-h-[48px] py-3 px-4 rounded-2xl bg-deepblue text-white text-xs sm:text-sm font-bold flex items-center justify-center hover:bg-deepblue-light transition">
+          Leer Escrituras
+        </a>
+        <button id="tile-modal-complete-btn"
+          class="flex-1 min-h-[48px] py-3 px-4 rounded-2xl bg-jade text-white text-xs sm:text-sm font-bold flex items-center justify-center hover:bg-jade-dark transition">
+          Completar Día
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       JAVASCRIPT MODULAR + INTEGRACIÓN CON CLOUD FIRESTORE (SDK 13.4.0)
+  ====================================================================== -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      doc,
+      setDoc,
+      getDoc,
+      getDocs,
+      deleteDoc,
+      onSnapshot
+    } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCowt9vmElWWGrj_HaCbnabeRGafdSOGLY",
+      authDomain: "libro-de-mormon-bee81.firebaseapp.com",
+      projectId: "libro-de-mormon-bee81",
+      storageBucket: "libro-de-mormon-bee81.firebasestorage.app",
+      messagingSenderId: "29423797501",
+      appId: "1:29423797501:web:25115006b2a34ebc476a94"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    /**
+     * =========================================================================
+     * MÓDULO 1: ICONOGRAFÍA VECTORIAL DETALLADA E IDENTIFICABLE (16 ICONOS)
+     * =========================================================================
+     */
+    const WELCOME_LOGO_SVG = `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="welcomeBrassGrad" cx="35%" cy="30%" r="70%">
+          <stop offset="0%" stop-color="#F6D78B"/>
+          <stop offset="55%" stop-color="#C8963E"/>
+          <stop offset="100%" stop-color="#8A5E18"/>
+        </radialGradient>
+        <radialGradient id="welcomeGlassGrad" cx="40%" cy="35%" r="65%">
+          <stop offset="0%" stop-color="#FFFFFF"/>
+          <stop offset="65%" stop-color="#E3F4F3"/>
+          <stop offset="100%" stop-color="#A8D8D6"/>
+        </radialGradient>
+      </defs>
+      <rect x="29" y="4" width="6" height="6" rx="1.5" fill="#9A6F22"/>
+      <rect x="29" y="54" width="6" height="6" rx="1.5" fill="#9A6F22"/>
+      <rect x="4" y="29" width="6" height="6" rx="1.5" fill="#9A6F22"/>
+      <rect x="54" y="29" width="6" height="6" rx="1.5" fill="#9A6F22"/>
+      <circle cx="32" cy="32" r="23" fill="url(#welcomeBrassGrad)" stroke="#7A5212" stroke-width="2"/>
+      <path d="M10 27H54M10 37H54" stroke="#7A5212" stroke-width="1.3" opacity="0.65"/>
+      <circle cx="32" cy="32" r="14.5" fill="url(#welcomeGlassGrad)" stroke="#7A5212" stroke-width="2"/>
+      <path d="M32 19.5V22M32 42V44.5M19.5 32H22M42 32H44.5" stroke="#1B365D" stroke-width="1.5" stroke-linecap="round"/>
+      <polygon points="32,20.5 34.5,32 32,42 29.5,32" fill="#0E7C7B"/>
+      <polygon points="32,20.5 34.5,32 29.5,32" fill="#C85A32"/>
+      <polygon points="40,24 33,33 25,39 31,31" fill="#1B365D" opacity="0.8"/>
+      <circle cx="32" cy="32" r="2.6" fill="#F6D78B" stroke="#1B365D" stroke-width="1.3"/>
+    </svg>`;
+
+    const AVATARS = [
+      {
+        id: 'liahona',
+        name: 'La Liahona',
+        title: 'Esfera y Agujas',
+        svg: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="brassGrad" cx="35%" cy="30%" r="70%">
+              <stop offset="0%" stop-color="#F6D78B"/>
+              <stop offset="55%" stop-color="#C8963E"/>
+              <stop offset="100%" stop-color="#8A5E18"/>
+            </radialGradient>
+            <radialGradient id="glassGrad" cx="40%" cy="35%" r="65%">
+              <stop offset="0%" stop-color="#FFFFFF"/>
+              <stop offset="65%" stop-color="#E3F4F3"/>
+              <stop offset="100%" stop-color="#A8D8D6"/>
+            </radialGradient>
+          </defs>
+          <rect x="29" y="4" width="6" height="6" rx="1.5" fill="#9A6F22"/>
+          <rect x="29" y="54" width="6" height="6" rx="1.5" fill="#9A6F22"/>
+          <rect x="4" y="29" width="6" height="6" rx="1.5" fill="#9A6F22"/>
+          <rect x="54" y="29" width="6" height="6" rx="1.5" fill="#9A6F22"/>
+          <circle cx="32" cy="32" r="23" fill="url(#brassGrad)" stroke="#7A5212" stroke-width="2"/>
+          <path d="M10 27H54M10 37H54" stroke="#7A5212" stroke-width="1.3" opacity="0.65"/>
+          <circle cx="32" cy="32" r="14.5" fill="url(#glassGrad)" stroke="#7A5212" stroke-width="2"/>
+          <path d="M32 19.5V22M32 42V44.5M19.5 32H22M42 32H44.5" stroke="#1B365D" stroke-width="1.5" stroke-linecap="round"/>
+          <polygon points="32,20.5 34.5,32 32,42 29.5,32" fill="#0E7C7B"/>
+          <polygon points="32,20.5 34.5,32 29.5,32" fill="#C85A32"/>
+          <polygon points="40,24 33,33 25,39 31,31" fill="#1B365D" opacity="0.8"/>
+          <circle cx="32" cy="32" r="2.6" fill="#F6D78B" stroke="#1B365D" stroke-width="1.3"/>
+        </svg>`
+      },
+      {
+        id: 'planchas',
+        name: 'Planchas de Oro',
+        title: 'Anales con Anillos',
+        svg: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M21 12H49L52 48H24L21 12Z" fill="#9A6F22"/>
+          <path d="M19 14H47L50 50H22L19 14Z" fill="#C8963E"/>
+          <path d="M17 16H45L48 52H20L17 16Z" fill="#F3D17C" stroke="#8A5E18" stroke-width="1.8" stroke-linejoin="round"/>
+          <path d="M23 23H40M23.5 29H38M24 35H41M24.5 41H37M25 46H40" stroke="#8A5E18" stroke-width="1.8" stroke-linecap="round"/>
+          <path d="M19 21H13C11 21 11 25 13 25H19" stroke="#1B365D" stroke-width="2.6" stroke-linecap="round"/>
+          <path d="M19.5 32H13.5C11.5 32 11.5 36 13.5 36H19.5" stroke="#1B365D" stroke-width="2.6" stroke-linecap="round"/>
+          <path d="M20 43H14C12 43 12 47 14 47H20" stroke="#1B365D" stroke-width="2.6" stroke-linecap="round"/>
+        </svg>`
+      },
+      {
+        id: 'espada',
+        name: 'Espada de Labán',
+        title: 'Empuñadura de Oro',
+        svg: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M51 9L55 13L27 41L23 37L51 9Z" fill="#EBF0F7" stroke="#1B365D" stroke-width="2" stroke-linejoin="round"/>
+          <path d="M51 9L55 13L27 41L25 39L51 9Z" fill="#CBD5E1"/>
+          <line x1="49" y1="15" x2="26" y2="38" stroke="#0E7C7B" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M17 33L31 47L28 50L14 36L17 33Z" fill="#E3B866" stroke="#8A5E18" stroke-width="1.8" stroke-linejoin="round"/>
+          <path d="M20 42L12 50L14 52L22 44" fill="#9A6F22" stroke="#7A5212" stroke-width="1.8"/>
+          <circle cx="11" cy="53" r="3.5" fill="#F3D17C" stroke="#8A5E18" stroke-width="1.8"/>
+        </svg>`
+      },
+      {
+        id: 'barco_nefi',
+        name: 'El Barco de Nefi',
+        title: 'Vela y Casco',
+        svg: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="32" y1="9" x2="32" y2="41" stroke="#7A5212" stroke-width="3" stroke-linecap="round"/>
+          <line x1="19" y1="16" x2="45" y2="16" stroke="#7A5212" stroke-width="2.2" stroke-linecap="round"/>
+          <path d="M20 16C24 22 24 29 19 35H31V16H20Z" fill="#FBF4E6" stroke="#C8963E" stroke-width="1.8" stroke-linejoin="round"/>
+          <path d="M33 16H44C40 22 40 29 45 35H33V16Z" fill="#E3F4F3" stroke="#0E7C7B" stroke-width="1.8" stroke-linejoin="round"/>
+          <polygon points="32,8 41,11 32,14" fill="#C85A32"/>
+          <path d="M10 39H54L47 50H17L10 39Z" fill="#C85A32" stroke="#1B365D" stroke-width="2" stroke-linejoin="round"/>
+          <line x1="13" y1="44" x2="51" y2="44" stroke="#F3D17C" stroke-width="1.8"/>
+          <path d="M8 54C14 51.5 20 56.5 26 54C32 51.5 38 56.5 44 54C50 51.5 53 54 56 54" stroke="#0E7C7B" stroke-width="2.4" stroke-linecap="round"/>
+        </svg>`
+      },
+      {
+        id: 'arbol_vida',
+        name: 'Árbol de la Vida',
+        title: 'Fruto Blanco',
+        svg: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M28 53C28 45 29 37 29 30H35C35 37 36 45 36 53H28Z" fill="#9A6F22" stroke="#7A5212" stroke-width="1.6"/>
+          <path d="M23 53H41" stroke="#7A5212" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M16 33C11 31 10 23 16 20C16 12 24 8 32 8C40 8 48 12 48 20C54 23 53 31 48 33C44 37 20 37 16 33Z" fill="#17A398" stroke="#085352" stroke-width="2"/>
+          <circle cx="22" cy="21" r="3.4" fill="#FFFFFF" stroke="#C8963E" stroke-width="1.8"/>
+          <circle cx="32" cy="16" r="3.6" fill="#FFFFFF" stroke="#C8963E" stroke-width="1.8"/>
+          <circle cx="42" cy="21" r="3.4" fill="#FFFFFF" stroke="#C8963E" stroke-width="1.8"/>
+          <circle cx="26" cy="29" r="3.2" fill="#FFFFFF" stroke="#C8963E" stroke-width="1.8"/>
+          <circle cx="38" cy="29" r="3.2" fill="#FFFFFF" stroke="#C8963E" stroke-width="1.8"/>
+        </svg>`
+      },
+      {
+        id: 'barra_hierro',
+        name: 'Barra de Hierro',
+        title: 'Sendero Recto',
+        svg: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="14,54 34,54 48,22 40,22" fill="#E6DEC8"/>
+          <line x1="17" y1="36" x2="17" y2="52" stroke="#7A5212" stroke-width="3" stroke-linecap="round"/>
+          <line x1="29" y1="27" x2="29" y2="44" stroke="#7A5212" stroke-width="3" stroke-linecap="round"/>
+          <line x1="41" y1="18" x2="41" y2="35" stroke="#7A5212" stroke-width="3" stroke-linecap="round"/>
+          <line x1="11" y1="40" x2="47" y2="14" stroke="#1B365D" stroke-width="4.5" stroke-linecap="round"/>
+          <line x1="11" y1="39" x2="47" y2="13" stroke="#64748B" stroke-width="1.4" stroke-linecap="round"/>
+          <circle cx="51" cy="11" r="4" fill="#F3D17C" stroke="#C8963E" stroke-width="1.5"/>
+        </svg>`
+      },
+      {
+        id: 'estandarte',
+        name: 'Estandarte de Libertad',
+        title: 'Manto de Moroni',
+        svg: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="16" y1="10" x2="16" y2="56" stroke="#7A5212" stroke-width="3.2" stroke-linecap="round"/>
+          <polygon points="16,5 12.5,12 19.5,12" fill="#C8963E"/>
+          <path d="M16 14H49L44 22L50 30L45 38H16V14Z" fill="#FAF7F2" stroke="#1B365D" stroke-width="2" stroke-linejoin="round"/>
+          <rect x="16" y="14" width="5" height="24" fill="#C85A32"/>
+          <path d="M25 20H41M25 26H38M25 32H40" stroke="#0E7C7B" stroke-width="2.2" stroke-linecap="round"/>
+        </svg>`
+      },
+      {
+        id: 'piedras_jared',
+        name: '16 Piedras Brillantes',
+        title: 'Cristales Luminosos',
+        svg: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="32" cy="32" r="22" fill="#FBF4E6"/>
+          <polygon points="32,10 41,21 32,32 23,21" fill="#FFFBEB" stroke="#C8963E" stroke-width="2.2" stroke-linejoin="round"/>
+          <line x1="32" y1="10" x2="32" y2="32" stroke="#F3D17C" stroke-width="1.5"/>
+          <polygon points="20,28 28,38 20,48 12,38" fill="#E3F4F3" stroke="#0E7C7B" stroke-width="2.2" stroke-linejoin="round"/>
+          <polygon points="44,28 52,38 44,48 36,38" fill="#E3F4F3" stroke="#0E7C7B" stroke-width="2.2" stroke-linejoin="round"/>
+          <path d="M32 4V7M13 17L16 19M51 17L48 19" stroke="#C8963E" stroke-width="2" stroke-linecap="round"/>
+        </svg>`
+      },
+      {
+        id: 'barco_jaredita',
+        name: 'Barco Jaredita',
+        title: 'Extremos en Punta',
+        svg: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M7 33C16 17 48 17 57 33C48 49 16 49 7 33Z" fill="#E3B866" stroke="#7A5212" stroke-width="2.2" stroke-linejoin="round"/>
+          <line x1="9" y1="33" x2="55" y2="33" stroke="#7A5212" stroke-width="2"/>
+          <rect x="27" y="21" width="10" height="4" rx="2" fill="#1B365D"/>
+          <circle cx="32" cy="28" r="2.8" fill="#FFFFFF" stroke="#0E7C7B" stroke-width="1.6"/>
+          <path d="M9 52C16 49 23 55 32 52C41 49 48 55 55 52" stroke="#0E7C7B" stroke-width="2.4" stroke-linecap="round"/>
+        </svg>`
+      },
+      {
+        id: 'arco_acero',
+        name: 'Arco de Acero',
+        title: 'Arco y Flecha',
+        svg: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M21 10C41 17 41 47 21 54" stroke="#1B365D" stroke-width="3.6" stroke-linecap="round"/>
+          <line x1="36" y1="28" x2="36" y2="36" stroke="#C8963E" stroke-width="4.5" stroke-linecap="round"/>
+          <polyline points="21,10 15,32 21,54" stroke="#9A6F22" stroke-width="1.8" fill="none"/>
+          <line x1="13" y1="32" x2="51" y2="32" stroke="#0E7C7B" stroke-width="2.6" stroke-linecap="round"/>
+          <polygon points="55,32 46,27.5 46,36.5" fill="#C85A32"/>
+          <path d="M13 32L9 28M13 32L9 36" stroke="#C85A32" stroke-width="2" stroke-linecap="round"/>
+        </svg>`
+      },
+      {
+        id: 'interpretes',
+        name: 'Intérpretes',
+        title: 'Urim y Tumim',
+        svg: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M14 48V33C14 22 50 22 50 33V48" stroke="#64748B" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="22" cy="32" r="8.5" fill="#E3F4F3" stroke="#1B365D" stroke-width="2.4"/>
+          <circle cx="42" cy="32" r="8.5" fill="#E3F4F3" stroke="#1B365D" stroke-width="2.4"/>
+          <path d="M19 29L22 26M39 29L42 26" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/>
+          <rect x="30" y="30" width="4" height="4" rx="1" fill="#C8963E"/>
+        </svg>`
+      },
+      {
+        id: 'pectoral',
+        name: 'Pectoral de Bronce',
+        title: 'Coraza Ceremonial',
+        svg: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M18 12H25L32 18L39 12H46L50 30C50 43 32 52 32 52C32 52 14 43 14 30L18 12Z" fill="#E3B866" stroke="#7A5212" stroke-width="2.2" stroke-linejoin="round"/>
+          <path d="M20 22H44M21 30H43M24 38H40" stroke="#0E7C7B" stroke-width="2.2" stroke-linecap="round"/>
+          <circle cx="32" cy="26" r="3" fill="#C85A32"/>
+        </svg>`
+      },
+      {
+        id: 'trompeta',
+        name: 'Trompeta Nefita',
+        title: 'Cuerno de Guerra',
+        svg: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 43C24 41 35 32 43 16L52 24C42 40 28 48 13 48L12 43Z" fill="#FBF4E6" stroke="#7A5212" stroke-width="2.2" stroke-linejoin="round"/>
+          <path d="M38 22L46 29M30 31L36 38" stroke="#C8963E" stroke-width="3" stroke-linecap="round"/>
+          <path d="M53 13C56 16 56 21 53 24" stroke="#C85A32" stroke-width="2.2" stroke-linecap="round"/>
+        </svg>`
+      },
+      {
+        id: 'rollo',
+        name: 'Rollo de Profecías',
+        title: 'Pergamino Sellado',
+        svg: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="17" y="13" width="30" height="38" rx="2" fill="#FAF7F2" stroke="#7A5212" stroke-width="2"/>
+          <rect x="13" y="10" width="38" height="6" rx="3" fill="#C8963E" stroke="#7A5212" stroke-width="1.8"/>
+          <rect x="13" y="48" width="38" height="6" rx="3" fill="#C8963E" stroke="#7A5212" stroke-width="1.8"/>
+          <path d="M23 23H41M23 29H38M23 35H34" stroke="#1B365D" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="39" cy="40" r="4.5" fill="#C85A32" stroke="#7A5212" stroke-width="1.5"/>
+        </svg>`
+      },
+      {
+        id: 'templo',
+        name: 'Templo Antiguo',
+        title: 'Pirámide Escalonada',
+        svg: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="9" y="45" width="46" height="8" rx="1.5" fill="#E6DEC8" stroke="#1B365D" stroke-width="2"/>
+          <rect x="15" y="36" width="34" height="9" rx="1.5" fill="#F2ECE1" stroke="#1B365D" stroke-width="2"/>
+          <rect x="21" y="27" width="22" height="9" rx="1.5" fill="#FAF7F2" stroke="#1B365D" stroke-width="2"/>
+          <rect x="24" y="15" width="16" height="12" rx="1.5" fill="#FBF4E6" stroke="#C8963E" stroke-width="2"/>
+          <polygon points="27,53 37,53 35,27 29,27" fill="#0E7C7B" stroke="#1B365D" stroke-width="1.6"/>
+          <rect x="29.5" y="19" width="5" height="8" fill="#1B365D"/>
+        </svg>`
+      },
+      {
+        id: 'semilla_fe',
+        name: 'Vasija y Semilla',
+        title: 'Brote Vivo',
+        svg: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M32 33V16" stroke="#0E7C7B" stroke-width="3" stroke-linecap="round"/>
+          <path d="M32 24C24 24 20 18 20 14C26 14 32 18 32 24Z" fill="#17A398" stroke="#085352" stroke-width="1.8"/>
+          <path d="M32 20C40 20 44 14 44 10C38 10 32 14 32 20Z" fill="#17A398" stroke="#085352" stroke-width="1.8"/>
+          <path d="M22 33H42L46 45C46 50 40 53 32 53C24 53 18 50 18 45L22 33Z" fill="#C85A32" stroke="#1B365D" stroke-width="2" stroke-linejoin="round"/>
+          <rect x="20" y="31" width="24" height="4" rx="2" fill="#E07A55" stroke="#1B365D" stroke-width="1.8"/>
+          <path d="M21 43H43" stroke="#F3D17C" stroke-width="2" stroke-dasharray="3 3"/>
+        </svg>`
+      }
+    ];
+
+    const SHIELD_SVG = `
+      <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+        <path d="M20 4L33 9V19.5C33 28.2 27.5 35 20 37.5C12.5 35 7 28.2 7 19.5V9L20 4Z" fill="#E3F4F3" stroke="#0E7C7B" stroke-width="2.4" stroke-linejoin="round"/>
+        <path d="M20 9.5L28 12.8V19.5C28 25.2 24.5 29.8 20 31.8C15.5 29.8 12 25.2 12 19.5V12.8L20 9.5Z" fill="#FBF4E6" stroke="#C8963E" stroke-width="1.8" stroke-linejoin="round"/>
+        <circle cx="20" cy="20" r="2.5" fill="#0E7C7B"/>
+      </svg>
+    `;
+
+    function getFlameSvg(isLitToday) {
+      if (isLitToday) {
+        return `
+          <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+            <path d="M20.5 4C20.5 4 31 12.2 31 22.2C31 28.9 25.9 35 19.5 35C13.1 35 9 29.8 9 23.6C9 19.4 11.4 15.6 13.5 13.5C13.3 16.4 15.2 18.2 16.8 18.2C15.4 13.2 17.8 7.6 20.5 4Z" fill="#E04F33" stroke="#C83E2B" stroke-width="1.6" stroke-linejoin="round"/>
+            <path d="M20 15.5C20 15.5 25.5 20 25.5 25.2C25.5 28.8 22.8 32 19.5 32C16.2 32 14 29.3 14 25.8C14 23.4 15.4 21.3 16.6 20.1C16.5 21.7 17.6 22.6 18.5 22.6C17.8 19.9 18.8 17.2 20 15.5Z" fill="#FBBF24"/>
+          </svg>
+        `;
+      }
+      return `
+        <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+          <path d="M20.5 4C20.5 4 31 12.2 31 22.2C31 28.9 25.9 35 19.5 35C13.1 35 9 29.8 9 23.6C9 19.4 11.4 15.6 13.5 13.5C13.3 16.4 15.2 18.2 16.8 18.2C15.4 13.2 17.8 7.6 20.5 4Z" fill="#D1D5DB" stroke="#9CA3AF" stroke-width="1.6" stroke-linejoin="round"/>
+          <path d="M20 15.5C20 15.5 25.5 20 25.5 25.2C25.5 28.8 22.8 32 19.5 32C16.2 32 14 29.3 14 25.8C14 23.4 15.4 21.3 16.6 20.1C16.5 21.7 17.6 22.6 18.5 22.6C17.8 19.9 18.8 17.2 20 15.5Z" fill="#E5E7EB"/>
+        </svg>
+      `;
+    }
+
+    const REWARD_ASSETS = {
+      chestClosed: `
+        <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-32 h-32">
+          <rect x="12" y="34" width="56" height="32" rx="5" fill="#9A6F22" stroke="#1B365D" stroke-width="2.5"/>
+          <path d="M12 34C12 21 22 16 40 16C58 16 68 21 68 34H12Z" fill="#C8963E" stroke="#1B365D" stroke-width="2.5"/>
+          <rect x="20" y="17" width="6" height="49" fill="#E3B866" stroke="#1B365D" stroke-width="1.8"/>
+          <rect x="54" y="17" width="6" height="49" fill="#E3B866" stroke="#1B365D" stroke-width="1.8"/>
+          <rect x="34" y="29" width="12" height="14" rx="3" fill="#F6D78B" stroke="#1B365D" stroke-width="2.2"/>
+          <circle cx="40" cy="36" r="2" fill="#1B365D"/>
+        </svg>
+      `,
+      chestOpenPrize: `
+        <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-32 h-32">
+          <circle cx="40" cy="30" r="22" fill="#FEF3C7"/>
+          <path d="M14 26L22 12H58L66 26H14Z" fill="#C8963E" stroke="#1B365D" stroke-width="2.4" stroke-linejoin="round"/>
+          <rect x="12" y="36" width="56" height="30" rx="5" fill="#9A6F22" stroke="#1B365D" stroke-width="2.5"/>
+          <polygon points="40,18 43,26 51,26 45,31 47,39 40,34 33,39 35,31 29,26 37,26" fill="#FBBF24" stroke="#9A6F22" stroke-width="1.5"/>
+        </svg>
+      `,
+      ymRingSvg: `
+        <svg viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-36 h-36">
+          <defs>
+            <linearGradient id="silverRing" x1="15%" y1="15%" x2="85%" y2="85%">
+              <stop offset="0%" stop-color="#F8FAFC"/>
+              <stop offset="45%" stop-color="#CBD5E1"/>
+              <stop offset="100%" stop-color="#64748B"/>
+            </linearGradient>
+          </defs>
+          <ellipse cx="48" cy="54" rx="28" ry="24" fill="none" stroke="url(#silverRing)" stroke-width="11"/>
+          <ellipse cx="48" cy="54" rx="23" ry="19" fill="none" stroke="#475569" stroke-width="1.5"/>
+          <path d="M48 16L62 21V33C62 42 56 49 48 52C40 49 34 42 34 33V21L48 16Z" fill="#0E7C7B" stroke="#F8FAFC" stroke-width="2.5"/>
+          <text x="48" y="38" text-anchor="middle" fill="#FFFFFF" font-family="Cinzel, serif" font-weight="700" font-size="13">HJ</text>
+          <path d="M24 22L28 26M72 22L68 26M48 8V12" stroke="#C8963E" stroke-width="2.2" stroke-linecap="round"/>
+        </svg>
+      `,
+      oilVialSvg: `
+        <svg viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-36 h-36">
+          <defs>
+            <linearGradient id="goldVial" x1="20%" y1="10%" x2="80%" y2="90%">
+              <stop offset="0%" stop-color="#FDE68A"/>
+              <stop offset="50%" stop-color="#C8963E"/>
+              <stop offset="100%" stop-color="#78350F"/>
+            </linearGradient>
+          </defs>
+          <circle cx="48" cy="14" r="6" fill="none" stroke="#9A6F22" stroke-width="2.5"/>
+          <rect x="41" y="20" width="14" height="10" rx="2" fill="url(#goldVial)" stroke="#78350F" stroke-width="1.8"/>
+          <line x1="41" y1="25" x2="55" y2="25" stroke="#78350F" stroke-width="1.5"/>
+          <rect x="37" y="30" width="22" height="46" rx="11" fill="url(#goldVial)" stroke="#78350F" stroke-width="2"/>
+          <rect x="41" y="38" width="14" height="30" rx="7" fill="#FEF3C7" fill-opacity="0.35"/>
+          <path d="M48 45C48 45 53 51.5 53 55C53 57.8 50.8 60 48 60C45.2 60 43 57.8 43 55C43 51.5 48 45 48 45Z" fill="#0E7C7B"/>
+        </svg>
+      `
+    };
+
+    const CUSTOM_PRIZE_IMAGES = {
+      ymRingUrl: '',
+      oilVialUrl: ''
+    };
+
+    /**
+     * =========================================================================
+     * MÓDULO 2: PLAN COMPLETO DE 60 DÍAS (239 CAPÍTULOS EXACTOS)
+     * =========================================================================
+     */
+    const STUDY_PLAN_60_DAYS = [
+      { day: 1,  bookSlug: '1-ne',   startCh: 1,  url: 'https://www.churchofjesuschrist.org/study/scriptures/bofm/1-ne/1?lang=spa',   label: '1 Nefi 1 – 1 Nefi 4',       chapters: 4, milestone: 'Inicio: La visión de Lehi', context: 'Lehi profetiza en Jerusalén, sale al desierto y Nefi obtiene las planchas de bronce.' },
+      { day: 2,  bookSlug: '1-ne',   startCh: 5,  url: 'https://www.churchofjesuschrist.org/study/scriptures/bofm/1-ne/5?lang=spa',   label: '1 Nefi 5 – 1 Nefi 8',       chapters: 4, milestone: null, context: 'El regocijo de Saríah, el regreso por Ismael y el sueño del árbol de la vida.' },
+      { day: 3,  bookSlug: '1-ne',   startCh: 9,  url: 'https://www.churchofjesuschrist.org/study/scriptures/bofm/1-ne/9?lang=spa',   label: '1 Nefi 9 – 1 Nefi 12',      chapters: 4, milestone: null, context: 'Los dos juegos de planchas y la visión panorámica de Nefi sobre la tierra prometida.' },
+      { day: 4,  bookSlug: '1-ne',   startCh: 13, url: 'https://www.churchofjesuschrist.org/study/scriptures/bofm/1-ne/13?lang=spa',  label: '1 Nefi 13 – 1 Nefi 16',     chapters: 4, milestone: null, context: 'La restauración de verdades claras y preciosas, la Liahona y el arco roto de Nefi.' },
+      { day: 5,  bookSlug: '1-ne',   startCh: 17, url: 'https://www.churchofjesuschrist.org/study/scriptures/bofm/1-ne/17?lang=spa',  label: '1 Nefi 17 – 1 Nefi 20',     chapters: 4, milestone: null, context: 'Abundancia, la construcción del barco, la travesía por el mar y escritos de Isaías.' },
+      { day: 6,  bookSlug: '1-ne',   startCh: 21, url: 'https://www.churchofjesuschrist.org/study/scriptures/bofm/1-ne/21?lang=spa',  label: '1 Nefi 21 – 2 Nefi 2',      chapters: 4, milestone: '2 Nefi', context: 'Conclusión de 1 Nefi y las profundas enseñanzas de Lehi sobre la oposición y el albedrío.' },
+      { day: 7,  bookSlug: '2-ne',   startCh: 3,  url: 'https://www.churchofjesuschrist.org/study/scriptures/bofm/2-ne/3?lang=spa',   label: '2 Nefi 3 – 2 Nefi 6',       chapters: 4, milestone: null, context: 'Profecías sobre José de Egipto, el salmo de Nefi y el sermón de Jacob.' },
+      { day: 8,  bookSlug: '2-ne',   startCh: 7,  url: 'https://www.churchofjesuschrist.org/study/scriptures/bofm/2-ne/7?lang=spa',   label: '2 Nefi 7 – 2 Nefi 10',      chapters: 4, milestone: null, context: 'Jacob testifica del poder de la Expiación infinita y el recogimiento de Israel.' },
+      { day: 9,  bookSlug: '2-ne',   startCh: 11, url: 'https://www.churchofjesuschrist.org/study/scriptures/bofm/2-ne/11?lang=spa',  label: '2 Nefi 11 – 2 Nefi 14',     chapters: 4, milestone: null, context: 'Nefi se deleita en Isaías: el monte de la casa del Señor en los postreros días.' },
+      { day: 10, bookSlug: '2-ne',   startCh: 15, url: 'https://www.churchofjesuschrist.org/study/scriptures/bofm/2-ne/15?lang=spa',  label: '2 Nefi 15 – 2 Nefi 18',     chapters: 4, milestone: null, context: 'El llamamiento de Isaías en el templo y la promesa de Emanuel.' },
+      { day: 11, bookSlug: '2-ne',   startCh: 19, url: 'https://www.churchofjesuschrist.org/study/scriptures/bofm/2-ne/19?lang=spa',  label: '2 Nefi 19 – 2 Nefi 22',     chapters: 4, milestone: null, context: 'Príncipe de Paz, el tronco de Isaí y el cántico de alabanza por la salvación.' },
+      { day: 12, bookSlug: '2-ne',   startCh: 23, url: 'https://www.churchofjesuschrist.org/study/scriptures/bofm/2-ne/23?lang=spa',  label: '2 Nefi 23 – 2 Nefi 26',     chapters: 4, milestone: null, context: 'La caída de Babilonia y el testimonio claro de Nefi acerca de Cristo.' },
+      { day: 13, bookSlug: '2-ne',   startCh: 27, url: 'https://www.churchofjesuschrist.org/study/scriptures/bofm/2-ne/27?lang=spa',  label: '2 Nefi 27 – 2 Nefi 30',     chapters: 4, milestone: null, context: 'La salida a luz de un libro sellado y cómo Dios habla a todas las naciones.' },
+      { day: 14, bookSlug: '2-ne',   startCh: 31, url: 'https://www.churchofjesuschrist.org/study/scriptures/bofm/2-ne/31?lang=spa',  label: '2 Nefi 31 – Jacob 1',       chapters: 4, milestone: 'Doctrina de Cristo', context: 'La senda estrecha y angosta, el deleitarse en las palabras de Cristo y el inicio de Jacob.' },
+      { day: 15, bookSlug: 'jacob',  startCh: 2,  url: 'https://www.churchofjesuschrist.org/study/scriptures/bofm/jacob/2?lang=spa',  label: 'Jacob 2 – Jacob 5',         chapters: 4, milestone: 'Alegoría del Olivo', context: 'Jacob exhorta contra el orgullo y relata la alegoría de Zenós sobre los olivos.' },
+      { day: 16, bookSlug: 'jacob',  startCh: 6,  url: 'https://www.churchofjesuschrist.org/study/scriptures/bofm/jacob/6?lang=spa',  label: 'Jacob 6 – Jarom 1',         chapters: 4, milestone: 'Enós y Jarom', context: 'La lucha espiritual de Enós en oración y el breve registro de fidelidad de Jarom.' },
+      { day: 17, bookSlug: 'omni',   startCh: 1,  url: 'https://www.churchofjesuschrist.org/study/scriptures/bofm/omni/1?lang=spa',   label: 'Omni 1 – Mosíah 2',         chapters: 4, milestone: 'Discurso del Rey Benjamín', context: 'El descubrimiento de Zarahemla y el inicio del discurso del rey Benjamín desde la torre.' },
+      { day: 18, bookSlug: 'mosiah', startCh: 3,  url: 'https://www.churchofjesuschrist.org/study/scriptures/bofm/mosiah/3?lang=spa', label: 'Mosíah 3 – Mosíah 6',       chapters: 4, milestone: null, context: 'El ángel instruye a Benjamín; el pueblo hace convenio y toma el nombre de Cristo.' },
+      { day: 19, bookSlug: 'mosiah', startCh: 7,  url: 'https://www.churchofjesuschrist.org/study/scriptures/bofm/mosiah/7?lang=spa', label: 'Mosíah 7 – Mosíah 10',      chapters: 4, milestone: null, context: 'Ammón halla al pueblo de Limhi y se descubre el registro de Zeniff.' },
+      { day: 20, bookSlug: 'mosiah', startCh: 11, url: 'https://www.churchofjesuschrist.org/study/scriptures/bofm/mosiah/11?lang=spa',label: 'Mosíah 11 – Mosíah 14',     chapters: 4, milestone: 'Abinadí ante Noé', context: 'El profeta Abinadí testifica ante el rey Noé y cita Isaías 53.' },
+      { day: 21, bookSlug: 'mosiah', startCh: 15, url: 'https://www.churchofjesuschrist.org/study/scriptures/bofm/mosiah/15?lang=spa',label: 'Mosíah 15 – Mosíah 18',     chapters: 4, milestone: 'Aguas de Mormón', context: 'El martirio de Abinadí y los bautismos de Alma en las aguas de Mormón.' },
+      { day: 22, bookSlug: 'mosiah', startCh: 19, url: 'https://www.churchofjesuschrist.org/study/scriptures/bofm/mosiah/19?lang=spa',label: 'Mosíah 19 – Mosíah 22',     chapters: 4, milestone: null, context: 'La liberación del pueblo de Limhi mediante el ingenio de Gedeón.' },
+      { day: 23, bookSlug: 'mosiah', startCh: 23, url: 'https://www.churchofjesuschrist.org/study/scriptures/bofm/mosiah/23?lang=spa',label: 'Mosíah 23 – Mosíah 26',     chapters: 4, milestone: null, context: 'El Señor aligera las cargas del pueblo de Alma y organiza la Iglesia en Zarahemla.' },
+      { day: 24, bookSlug: 'mosiah', startCh: 27, url: 'https://www.churchofjesuschrist.org/study/scriptures/bofm/mosiah/27?lang=spa',label: 'Mosíah 27 – Alma 1',        chapters: 4, milestone: 'Conversión de Alma', context: 'La conversión de Alma hijo y los hijos de Mosíah; se establecen los jueces.' },
+      { day: 25, bookSlug: 'alma',   startCh: 2,  url: 'https://www.churchofjesuschrist.org/study/scriptures/bofm/alma/2?lang=spa',   label: 'Alma 2 – Alma 5',           chapters: 4, milestone: 'Cambio de Corazón', context: 'Alma pregunta a los de Zarahemla si han experimentado un potente cambio en el corazón.' },
+      { day: 26, bookSlug: 'alma',   startCh: 6,  url: 'https://www.churchofjesuschrist.org/study/scriptures/bofm/alma/6?lang=spa',   label: 'Alma 6 – Alma 9',           chapters: 4, milestone: null, context: 'El mensaje de esperanza en Gedeón y la llegada de Alma y Amulek a Ammoníah.' },
+      { day: 27, bookSlug: 'alma',   startCh: 10, url: 'https://www.churchofjesuschrist.org/study/scriptures/bofm/alma/10?lang=spa',  label: 'Alma 10 – Alma 13',         chapters: 4, milestone: null, context: 'Amulek testifica junto a Alma; Zeezrom es convencido y Alma enseña sobre el sacerdocio.' },
+      { day: 28, bookSlug: 'alma',   startCh: 14, url: 'https://www.churchofjesuschrist.org/study/scriptures/bofm/alma/14?lang=spa',  label: 'Alma 14 – Alma 17',         chapters: 4, milestone: 'Hijos de Mosíah', context: 'Liberación de la prisión en Ammoníah y el encuentro con los hijos de Mosíah.' },
+      { day: 29, bookSlug: 'alma',   startCh: 18, url: 'https://www.churchofjesuschrist.org/study/scriptures/bofm/alma/18?lang=spa',  label: 'Alma 18 – Alma 21',         chapters: 4, milestone: null, context: 'Ammón enseña al rey Lamoni y Aarón predica en la tierra de Middoni.' },
+      { day: 30, bookSlug: 'alma',   startCh: 22, url: 'https://www.churchofjesuschrist.org/study/scriptures/bofm/alma/22?lang=spa',  label: 'Alma 22 – Alma 25',         chapters: 4, milestone: 'Mitad del Libro', prizeType: 'ym_ring', context: 'Conversión del padre de Lamoni; los anti-nefi-lehitas entierran sus armas. ¡Mitad del Libro de Mormón!' },
+      { day: 31, bookSlug: 'alma',   startCh: 26, url: 'https://www.churchofjesuschrist.org/study/scriptures/bofm/alma/26?lang=spa',  label: 'Alma 26 – Alma 29',         chapters: 4, milestone: null, context: 'El cántico de gozo misional de Ammón y el anhelo de Alma de ser un ángel.' },
+      { day: 32, bookSlug: 'alma',   startCh: 30, url: 'https://www.churchofjesuschrist.org/study/scriptures/bofm/alma/30?lang=spa',  label: 'Alma 30 – Alma 33',         chapters: 4, milestone: 'La Semilla de Fe', context: 'Korihor es refutado y Alma enseña a los zoramitas a plantar la palabra como una semilla.' },
+      { day: 33, bookSlug: 'alma',   startCh: 34, url: 'https://www.churchofjesuschrist.org/study/scriptures/bofm/alma/34?lang=spa',  label: 'Alma 34 – Alma 37',         chapters: 4, milestone: null, context: 'Amulek enseña sobre el sacrificio infinito y Alma encarga los anales a Helamán.' },
+      { day: 34, bookSlug: 'alma',   startCh: 38, url: 'https://www.churchofjesuschrist.org/study/scriptures/bofm/alma/38?lang=spa',  label: 'Alma 38 – Alma 41',         chapters: 4, milestone: null, context: 'Consejos de Alma a Shiblón y Coriantón sobre la justicia y la restauración.' },
+      { day: 35, bookSlug: 'alma',   startCh: 42, url: 'https://www.churchofjesuschrist.org/study/scriptures/bofm/alma/42?lang=spa',  label: 'Alma 42 – Alma 45',         chapters: 4, milestone: 'Capítulos de Guerra', context: 'El plan de misericordia y el inicio de los conflictos liderados por el capitán Moroni.' },
+      { day: 36, bookSlug: 'alma',   startCh: 46, url: 'https://www.churchofjesuschrist.org/study/scriptures/bofm/alma/46?lang=spa',  label: 'Alma 46 – Alma 49',         chapters: 4, milestone: 'Estandarte de Libertad', context: 'Moroni alza el estandarte de la libertad y fortifica las ciudades nefitas.' },
+      { day: 37, bookSlug: 'alma',   startCh: 50, url: 'https://www.churchofjesuschrist.org/study/scriptures/bofm/alma/50?lang=spa',  label: 'Alma 50 – Alma 53',         chapters: 4, milestone: null, context: 'Pahorán es nombrado juez superior y se reclutan los 2,000 jóvenes guerreros.' },
+      { day: 38, bookSlug: 'alma',   startCh: 54, url: 'https://www.churchofjesuschrist.org/study/scriptures/bofm/alma/54?lang=spa',  label: 'Alma 54 – Alma 57',         chapters: 4, milestone: 'Jóvenes Guerreros', context: 'La epístola de Helamán relatando la fe milagrosa de los jóvenes stripling.' },
+      { day: 39, bookSlug: 'alma',   startCh: 58, url: 'https://www.churchofjesuschrist.org/study/scriptures/bofm/alma/58?lang=spa',  label: 'Alma 58 – Alma 61',         chapters: 4, milestone: null, context: 'La victoria en Cumeni y el intercambio de cartas entre Moroni y Pahorán.' },
+      { day: 40, bookSlug: 'alma',   startCh: 62, url: 'https://www.churchofjesuschrist.org/study/scriptures/bofm/alma/62?lang=spa',  label: 'Alma 62 – Helamán 2',       chapters: 4, milestone: 'Libro de Helamán', context: 'Se restablece la paz en la tierra y comienza el registro del libro de Helamán.' },
+      { day: 41, bookSlug: 'hel',    startCh: 3,  url: 'https://www.churchofjesuschrist.org/study/scriptures/bofm/hel/3?lang=spa',    label: 'Helamán 3 – Helamán 6',     chapters: 4, milestone: 'Roca de Nuestro Redentor', context: 'Nefi y Lehi predican con poder y Helamán exhorta a edificar sobre la roca de Cristo.' },
+      { day: 42, bookSlug: 'hel',    startCh: 7,  url: 'https://www.churchofjesuschrist.org/study/scriptures/bofm/hel/7?lang=spa',    label: 'Helamán 7 – Helamán 10',    chapters: 4, milestone: null, context: 'Nefi ora en su torre, revela el asesinato del juez superior y recibe el poder sellador.' },
+      { day: 43, bookSlug: 'hel',    startCh: 11, url: 'https://www.churchofjesuschrist.org/study/scriptures/bofm/hel/11?lang=spa',   label: 'Helamán 11 – Helamán 14',   chapters: 4, milestone: 'Samuel el Lamanita', context: 'Samuel profetiza desde la muralla sobre las señales del nacimiento y muerte de Cristo.' },
+      { day: 44, bookSlug: 'hel',    startCh: 15, url: 'https://www.churchofjesuschrist.org/study/scriptures/bofm/hel/15?lang=spa',   label: 'Helamán 15 – 3 Nefi 2',     chapters: 4, milestone: '3 Nefi', context: 'Se cumplen las profecías de Samuel con una noche sin oscuridad y una nueva estrella.' },
+      { day: 45, bookSlug: '3-ne',   startCh: 3,  url: 'https://www.churchofjesuschrist.org/study/scriptures/bofm/3-ne/3?lang=spa',   label: '3 Nefi 3 – 3 Nefi 6',       chapters: 4, milestone: null, context: 'La unión del pueblo contra los ladrones de Gadiantón bajo Laconeo y Gidgiddoni.' },
+      { day: 46, bookSlug: '3-ne',   startCh: 7,  url: 'https://www.churchofjesuschrist.org/study/scriptures/bofm/3-ne/7?lang=spa',   label: '3 Nefi 7 – 3 Nefi 10',      chapters: 4, milestone: null, context: 'Grandes tempestades y oscuridad anuncian la crucifixión; se oye la voz del Salvador.' },
+      { day: 47, bookSlug: '3-ne',   startCh: 11, url: 'https://www.churchofjesuschrist.org/study/scriptures/bofm/3-ne/11?lang=spa',  label: '3 Nefi 11 – 3 Nefi 14',     chapters: 4, milestone: '3 Nefi 11: Abundancia', context: 'Jesucristo desciende en el templo de Abundancia, invita a palpar Sus heridas y enseña.' },
+      { day: 48, bookSlug: '3-ne',   startCh: 15, url: 'https://www.churchofjesuschrist.org/study/scriptures/bofm/3-ne/15?lang=spa',  label: '3 Nefi 15 – 3 Nefi 18',     chapters: 4, milestone: null, context: 'Cristo sana a los enfermos, bendice a los niños e instituye la Santa Cena.' },
+      { day: 49, bookSlug: '3-ne',   startCh: 19, url: 'https://www.churchofjesuschrist.org/study/scriptures/bofm/3-ne/19?lang=spa',  label: '3 Nefi 19 – 3 Nefi 22',     chapters: 4, milestone: null, context: 'Los doce discípulos ministran, el Salvador ora por ellos y expone las profecías.' },
+      { day: 50, bookSlug: '3-ne',   startCh: 23, url: 'https://www.churchofjesuschrist.org/study/scriptures/bofm/3-ne/23?lang=spa',  label: '3 Nefi 23 – 3 Nefi 26',     chapters: 4, milestone: null, context: 'Se revisan las escrituras, se citan las palabras de Malaquías y los niños hablan maravillas.' },
+      { day: 51, bookSlug: '3-ne',   startCh: 27, url: 'https://www.churchofjesuschrist.org/study/scriptures/bofm/3-ne/27?lang=spa',  label: '3 Nefi 27 – 3 Nefi 30',     chapters: 4, milestone: null, context: 'El Salvador define Su Evangelio y concede el deseo de los tres discípulos nefitas.' },
+      { day: 52, bookSlug: '4-ne',   startCh: 1,  url: 'https://www.churchofjesuschrist.org/study/scriptures/bofm/4-ne/1?lang=spa',   label: '4 Nefi 1 – Mormón 3',       chapters: 4, milestone: '4 Nefi y Mormón', context: 'Dos siglos de paz y unidad tras la visita de Cristo, seguidos por el inicio de Mormón.' },
+      { day: 53, bookSlug: 'morm',   startCh: 4,  url: 'https://www.churchofjesuschrist.org/study/scriptures/bofm/morm/4?lang=spa',   label: 'Mormón 4 – Mormón 7',       chapters: 4, milestone: null, context: 'La caída final en Cumorah y el último mensaje de Mormón a los descendientes futuros.' },
+      { day: 54, bookSlug: 'morm',   startCh: 8,  url: 'https://www.churchofjesuschrist.org/study/scriptures/bofm/morm/8?lang=spa',   label: 'Mormón 8 – Éter 2',         chapters: 4, milestone: 'Libro de Éter', context: 'Moroni queda solo, concluye el registro de su padre y comienza la historia jaredita.' },
+      { day: 55, bookSlug: 'ether',  startCh: 3,  url: 'https://www.churchofjesuschrist.org/study/scriptures/bofm/ether/3?lang=spa',  label: 'Éter 3 – Éter 6',           chapters: 4, milestone: 'El Hermano de Jared', context: 'El Señor toca las dieciséis piedras luminosas y guía los barcos por el océano.' },
+      { day: 56, bookSlug: 'ether',  startCh: 7,  url: 'https://www.churchofjesuschrist.org/study/scriptures/bofm/ether/7?lang=spa',  label: 'Éter 7 – Éter 10',          chapters: 4, milestone: null, context: 'Reyes, profetas y prosperidad en la tierra prometida de los jareditas.' },
+      { day: 57, bookSlug: 'ether',  startCh: 11, url: 'https://www.churchofjesuschrist.org/study/scriptures/bofm/ether/11?lang=spa', label: 'Éter 11 – Éter 14',         chapters: 4, milestone: null, context: 'Moroni enseña sobre la fe, la esperanza y la caridad mientras cae la nación jaredita.' },
+      { day: 58, bookSlug: 'ether',  startCh: 15, url: 'https://www.churchofjesuschrist.org/study/scriptures/bofm/ether/15?lang=spa', label: 'Éter 15 – Moroni 3',        chapters: 4, milestone: 'Libro de Moroni', context: 'Fin de Éter e inicio del libro de Moroni con ordenanzas del Espíritu Santo y el sacerdocio.' },
+      { day: 59, bookSlug: 'moro',   startCh: 4,  url: 'https://www.churchofjesuschrist.org/study/scriptures/bofm/moro/4?lang=spa',   label: 'Moroni 4 – Moroni 7',       chapters: 4, milestone: null, context: 'Oraciones sacramentales, el bautismo y el sermón de Mormón sobre la fe, esperanza y caridad.' },
+      { day: 60, bookSlug: 'moro',   startCh: 8,  url: 'https://www.churchofjesuschrist.org/study/scriptures/bofm/moro/8?lang=spa',   label: 'Moroni 8 – Moroni 10',      chapters: 3, milestone: 'Meta Final', prizeType: 'oil_vial', context: 'Exhortación final de Moroni: pedir a Dios con corazón sincero y venir a Cristo.' }
+    ];
+
+    function getGospelLibraryUrl(dayObj) {
+      return dayObj.url || `https://www.churchofjesuschrist.org/study/scriptures/bofm/${dayObj.bookSlug}/${dayObj.startCh}?lang=spa`;
+    }
+
+    function getWhatsAppRecoveryUrl() {
+      const rawDigits = StorageService.getRecoveryPhone().replace(/\D/g, '');
+      const waDigits = rawDigits.length === 10 ? `52${rawDigits}` : rawDigits;
+      const msg = encodeURIComponent('Hola, olvidé mi PIN o nombre de la aplicación, ¿me puedes ayudar?');
+      return `https://wa.me/${waDigits}?text=${msg}`;
+    }
+
+    function copyTextFallback(text) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand('copy');
+      } catch (e) {}
+      ta.remove();
+    }
+
+    function handleExternalLinkClick(e, url, label) {
+      copyTextFallback(url);
+      let opened = null;
+      try {
+        opened = window.open(url, '_blank', 'noopener,noreferrer');
+      } catch (err) {
+        opened = null;
+      }
+
+      if (opened) {
+        e.preventDefault();
+        return;
+      }
+
+      if (window.top && window.top !== window.self) {
+        showToast(`${label} (Enlace copiado por si la vista previa bloquea salir)`, 'jade');
+      }
+    }
+
+    /**
+     * =========================================================================
+     * MÓDULO 3: SISTEMA DE CALENDARIO REAL, ESCUDOS Y SINCRONIZACIÓN FIRESTORE
+     * =========================================================================
+     */
+    const CalendarSystem = {
+      toDateKey(dateObj = new Date()) {
+        const y = dateObj.getFullYear();
+        const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+        const d = String(dateObj.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+      },
+
+      getTodayKey() {
+        return this.toDateKey(new Date());
+      },
+
+      getYesterdayKey() {
+        const d = new Date();
+        d.setDate(d.getDate() - 1);
+        return this.toDateKey(d);
+      },
+
+      getWeekKey(dateObj = new Date()) {
+        const d = new Date(Date.UTC(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate()));
+        const dayNum = d.getUTCDay() || 7;
+        d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+        const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+        const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+        return `${d.getUTCFullYear()}-W${String(weekNo).padStart(2, '0')}`;
+      },
+
+      diffCalendarDays(fromKey, toKey) {
+        const [y1, m1, d1] = fromKey.split('-').map(Number);
+        const [y2, m2, d2] = toKey.split('-').map(Number);
+        const utc1 = Date.UTC(y1, m1 - 1, d1);
+        const utc2 = Date.UTC(y2, m2 - 1, d2);
+        return Math.round((utc2 - utc1) / 86400000);
+      }
+    };
+
+    const StorageService = {
+      KEYS: {
+        USERS: 'bom60_users_clean_v2',
+        ACTIVE_USER_ID: 'bom60_active_uid_v2',
+        HOST_CONFIG: 'bom60_host_config_v1',
+        HOST_NOTIFICATIONS: 'bom60_host_notifications_v1',
+        IS_HOST_SESSION: 'bom60_is_host_session_v1',
+        RECOVERY_WA_PHONE: 'bom60_recovery_wa_phone_v1'
+      },
+
+      DEFAULT_WA_PHONE: '2217201158',
+
+      async hydrateFromFirestore() {
+        try {
+          const usersSnap = await getDocs(collection(db, 'users'));
+          const cloudUsers = [];
+          usersSnap.forEach((docSnap) => {
+            cloudUsers.push({ uid: docSnap.id, ...docSnap.data() });
+          });
+          localStorage.setItem(this.KEYS.USERS, JSON.stringify(cloudUsers));
+
+          const notifSnap = await getDocs(collection(db, 'host_notifications'));
+          const cloudNotifs = [];
+          notifSnap.forEach((docSnap) => {
+            cloudNotifs.push({ id: docSnap.id, ...docSnap.data() });
+          });
+          cloudNotifs.sort((a, b) => (b.createdAtMs || 0) - (a.createdAtMs || 0));
+          localStorage.setItem(this.KEYS.HOST_NOTIFICATIONS, JSON.stringify(cloudNotifs));
+
+          const hostDoc = await getDoc(doc(db, 'config', 'host'));
+          if (hostDoc.exists()) {
+            localStorage.setItem(this.KEYS.HOST_CONFIG, JSON.stringify(hostDoc.data()));
+          }
+
+          const recDoc = await getDoc(doc(db, 'config', 'recovery'));
+          if (recDoc.exists() && recDoc.data().phone) {
+            localStorage.setItem(this.KEYS.RECOVERY_WA_PHONE, String(recDoc.data().phone));
+          }
+        } catch (err) {
+          console.warn('No se pudo sincronizar inicialmente con Firestore, usando caché local:', err);
+        }
+      },
+
+      subscribeRealtime(onSync) {
+        try {
+          onSnapshot(collection(db, 'users'), (snapshot) => {
+            const list = [];
+            snapshot.forEach((d) => list.push({ uid: d.id, ...d.data() }));
+            localStorage.setItem(this.KEYS.USERS, JSON.stringify(list));
+            if (typeof onSync === 'function') onSync();
+          });
+
+          onSnapshot(collection(db, 'host_notifications'), (snapshot) => {
+            const list = [];
+            snapshot.forEach((d) => list.push({ id: d.id, ...d.data() }));
+            list.sort((a, b) => (b.createdAtMs || 0) - (a.createdAtMs || 0));
+            localStorage.setItem(this.KEYS.HOST_NOTIFICATIONS, JSON.stringify(list));
+            if (typeof onSync === 'function') onSync();
+          });
+        } catch (err) {
+          console.warn('Listener de Firestore no disponible:', err);
+        }
+      },
+
+      getRecoveryPhone() {
+        const saved = localStorage.getItem(this.KEYS.RECOVERY_WA_PHONE);
+        return (saved && saved.trim()) ? saved.trim() : this.DEFAULT_WA_PHONE;
+      },
+
+      saveRecoveryPhone(phone) {
+        const cleaned = String(phone || '').replace(/\D/g, '') || this.DEFAULT_WA_PHONE;
+        localStorage.setItem(this.KEYS.RECOVERY_WA_PHONE, cleaned);
+        setDoc(doc(db, 'config', 'recovery'), { phone: cleaned }, { merge: true }).catch(console.error);
+        return cleaned;
+      },
+
+      getAllUsers() {
+        return JSON.parse(localStorage.getItem(this.KEYS.USERS) || '[]');
+      },
+
+      saveAllUsers(users) {
+        localStorage.setItem(this.KEYS.USERS, JSON.stringify(users));
+        users.forEach((u) => {
+          if (u && u.uid) {
+            setDoc(doc(db, 'users', u.uid), u, { merge: true }).catch(console.error);
+          }
+        });
+      },
+
+      getHostConfig() {
+        return JSON.parse(localStorage.getItem(this.KEYS.HOST_CONFIG) || 'null');
+      },
+
+      saveHostPin(pin) {
+        const cfg = { pin, createdAt: new Date().toISOString() };
+        localStorage.setItem(this.KEYS.HOST_CONFIG, JSON.stringify(cfg));
+        setDoc(doc(db, 'config', 'host'), cfg, { merge: true }).catch(console.error);
+        return cfg;
+      },
+
+      isHostSession() {
+        return localStorage.getItem(this.KEYS.IS_HOST_SESSION) === 'true';
+      },
+
+      setHostSession(active) {
+        if (active) {
+          localStorage.setItem(this.KEYS.IS_HOST_SESSION, 'true');
+        } else {
+          localStorage.removeItem(this.KEYS.IS_HOST_SESSION);
+        }
+      },
+
+      getHostNotifications() {
+        return JSON.parse(localStorage.getItem(this.KEYS.HOST_NOTIFICATIONS) || '[]');
+      },
+
+      addHostNotification({ type, playerNickname, playerAvatarId, message, dayNum }) {
+        const list = this.getHostNotifications();
+        const nowMs = Date.now();
+        const item = {
+          id: 'notif_' + nowMs + '_' + Math.random().toString(36).slice(2, 6),
+          type,
+          playerNickname,
+          playerAvatarId,
+          message,
+          dayNum,
+          unread: true,
+          createdAtMs: nowMs,
+          timestamp: new Date().toLocaleString('es-MX', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
+        };
+        list.unshift(item);
+        localStorage.setItem(this.KEYS.HOST_NOTIFICATIONS, JSON.stringify(list));
+        setDoc(doc(db, 'host_notifications', item.id), item).catch(console.error);
+        return list;
+      },
+
+      markAllHostNotificationsRead() {
+        const list = this.getHostNotifications().map(n => ({ ...n, unread: false }));
+        localStorage.setItem(this.KEYS.HOST_NOTIFICATIONS, JSON.stringify(list));
+        list.forEach((n) => {
+          if (n.id) {
+            setDoc(doc(db, 'host_notifications', n.id), { unread: false }, { merge: true }).catch(console.error);
+          }
+        });
+        return list;
+      },
+
+      getActiveUser() {
+        const uid = localStorage.getItem(this.KEYS.ACTIVE_USER_ID);
+        if (!uid) return null;
+        const users = this.getAllUsers();
+        const user = users.find(u => u.uid === uid) || null;
+        if (user) {
+          return this.syncCalendarAndShields(user);
+        }
+        return null;
+      },
+
+      setActiveUser(uid) {
+        if (uid) {
+          localStorage.setItem(this.KEYS.ACTIVE_USER_ID, uid);
+        } else {
+          localStorage.removeItem(this.KEYS.ACTIVE_USER_ID);
+        }
+      },
+
+      createUser({ name, nickname, avatarId, pin }) {
+        const users = this.getAllUsers();
+        const newUser = {
+          uid: 'user_' + Date.now(),
+          name: name.trim(),
+          nickname: nickname.trim(),
+          avatarId,
+          pin,
+          completedDays: [],
+          streak: 0,
+          shields: 1,
+          lastShieldWeek: CalendarSystem.getWeekKey(),
+          shieldProtectedDates: [],
+          lastCompletedDate: null,
+          chestWins: 0,
+          reflections: {}
+        };
+        users.push(newUser);
+        localStorage.setItem(this.KEYS.USERS, JSON.stringify(users));
+        setDoc(doc(db, 'users', newUser.uid), newUser).catch(console.error);
+        this.setActiveUser(newUser.uid);
+        return newUser;
+      },
+
+      deleteReflection(uid, dayNum) {
+        const users = this.getAllUsers();
+        const idx = users.findIndex(u => u.uid === uid);
+        if (idx !== -1 && users[idx].reflections && users[idx].reflections[dayNum]) {
+          delete users[idx].reflections[dayNum];
+          localStorage.setItem(this.KEYS.USERS, JSON.stringify(users));
+          setDoc(doc(db, 'users', uid), { reflections: users[idx].reflections }, { merge: true }).catch(console.error);
+          return true;
+        }
+        return false;
+      },
+
+      updateUser(updatedUser) {
+        const users = this.getAllUsers();
+        const idx = users.findIndex(u => u.uid === updatedUser.uid);
+        if (idx !== -1) {
+          users[idx] = updatedUser;
+          localStorage.setItem(this.KEYS.USERS, JSON.stringify(users));
+        }
+        if (updatedUser && updatedUser.uid) {
+          setDoc(doc(db, 'users', updatedUser.uid), updatedUser, { merge: true }).catch(console.error);
+        }
+        return updatedUser;
+      },
+
+      syncCalendarAndShields(user) {
+        let changed = false;
+        const todayKey = CalendarSystem.getTodayKey();
+        const yesterdayKey = CalendarSystem.getYesterdayKey();
+        const currentWeek = CalendarSystem.getWeekKey();
+
+        if (!Array.isArray(user.shieldProtectedDates)) {
+          user.shieldProtectedDates = [];
+          changed = true;
+        }
+        if (typeof user.shields !== 'number') {
+          user.shields = 1;
+          changed = true;
+        }
+
+        if (user.lastShieldWeek !== currentWeek) {
+          user.lastShieldWeek = currentWeek;
+          if (user.shields < 2) {
+            user.shields = Math.min(2, user.shields + 1);
+          }
+          changed = true;
+        }
+
+        if (user.streak > 0 && user.lastCompletedDate && user.lastCompletedDate !== todayKey && user.lastCompletedDate !== yesterdayKey) {
+          const daysMissed = CalendarSystem.diffCalendarDays(user.lastCompletedDate, todayKey) - 1;
+          if (daysMissed === 1 && user.shields > 0 && !user.shieldProtectedDates.includes(yesterdayKey)) {
+            user.shields -= 1;
+            user.shieldProtectedDates.push(yesterdayKey);
+            user.lastCompletedDate = yesterdayKey;
+            changed = true;
+          } else if (daysMissed >= 1) {
+            user.streak = 0;
+            changed = true;
+          }
+        }
+
+        if (changed) {
+          this.updateUser(user);
+        }
+        return user;
+      }
+    };
+
+    const App = {
+      currentUser: null,
+      activeTab: 'board',
+      planFilter: 'all',
+      journalFilter: 'mine',
+      selectedAvatarId: 'liahona',
+      tempRegistrationData: null,
+      pendingReflectionDay: null,
+      calendarWatcherId: null,
+
+      async init() {
+        this.bindGlobalEvents();
+        this.bindSecretHostHold();
+
+        this.bootFromCache();
+        await StorageService.hydrateFromFirestore();
+        this.bootFromCache();
+
+        StorageService.subscribeRealtime(() => {
+          if (StorageService.isHostSession()) {
+            this.updateHostBadges();
+            if (this.activeTab === 'host') this.renderHostDashboard();
+          } else if (this.currentUser) {
+            const refreshed = StorageService.getActiveUser();
+            if (refreshed) {
+              this.currentUser = refreshed;
+              this.renderHeaderAndMetrics();
+              if (this.activeTab === 'board') this.renderOpenJourneyBoard();
+              if (this.activeTab === 'plan') this.renderStudyPlan();
+              if (this.activeTab === 'journal') this.renderJournal();
+            }
+          } else if (!document.getElementById('register-step2-avatar').classList.contains('hidden')) {
+            this.renderAvatarSelector();
+          }
+        });
+
+        this.startCalendarWatcher();
+      },
+
+      bootFromCache() {
+        if (StorageService.isHostSession()) {
+          this.enterHostMode();
+          return;
+        }
+
+        const activeUser = StorageService.getActiveUser();
+        if (activeUser) {
+          this.currentUser = activeUser;
+          this.showAppView();
+        } else {
+          this.renderAvatarSelector();
+          this.showAuthView('choice');
+        }
+      },
+
+      bindSecretHostHold() {
+        const trigger = document.getElementById('welcome-emblem-trigger');
+        const fill = document.getElementById('emblem-hold-fill');
+        if (!trigger || !fill) return;
+
+        let tapCount = 0;
+        let tapResetTimer = null;
+        let holdTimer = null;
+        const HOLD_DURATION_MS = 5000;
+
+        const resetSequence = () => {
+          if (holdTimer) {
+            clearTimeout(holdTimer);
+            holdTimer = null;
+          }
+          if (tapResetTimer) {
+            clearTimeout(tapResetTimer);
+            tapResetTimer = null;
+          }
+          tapCount = 0;
+          fill.style.transition = 'height 180ms ease-out';
+          fill.style.height = '0%';
+        };
+
+        const handlePressStart = (e) => {
+          if (e.type === 'mousedown' && e.button !== 0) return;
+          if (e.type === 'touchstart') e.preventDefault();
+
+          if (tapResetTimer) clearTimeout(tapResetTimer);
+          tapCount += 1;
+
+          if (tapCount >= 3) {
+            fill.style.transition = `height ${HOLD_DURATION_MS}ms linear`;
+            fill.style.height = '100%';
+
+            holdTimer = setTimeout(() => {
+              resetSequence();
+              this.openHostAuthStep();
+            }, HOLD_DURATION_MS);
+          } else {
+            tapResetTimer = setTimeout(() => {
+              resetSequence();
+            }, 1500);
+          }
+        };
+
+        const handlePressEnd = () => {
+          if (tapCount >= 3 || holdTimer) {
+            resetSequence();
+          }
+        };
+
+        trigger.addEventListener('mousedown', handlePressStart);
+        trigger.addEventListener('touchstart', handlePressStart, { passive: false });
+        trigger.addEventListener('mouseup', handlePressEnd);
+        trigger.addEventListener('mouseleave', handlePressEnd);
+        trigger.addEventListener('touchend', handlePressEnd);
+        trigger.addEventListener('touchcancel', handlePressEnd);
+      },
+
+      openHostAuthStep() {
+        const hostCfg = StorageService.getHostConfig();
+        const titleEl = document.getElementById('host-form-title');
+        const subEl = document.getElementById('host-form-subtitle');
+        const submitEl = document.getElementById('host-submit-btn');
+
+        if (!hostCfg) {
+          titleEl.textContent = 'Configura tu código de anfitrión';
+          subEl.textContent = '¿Qué código quieres usar? Se guardará automáticamente en Firestore.';
+          submitEl.textContent = 'Guardar código y entrar';
+        } else {
+          titleEl.textContent = 'Inicia sesión como anfitrión';
+          subEl.textContent = 'Ingresa el código secreto que configuraste.';
+          submitEl.textContent = 'Entrar como Anfitrión';
+        }
+
+        document.getElementById('host-pin-input').value = '';
+        this.showAuthView('host');
+      },
+
+      enterHostMode() {
+        StorageService.setHostSession(true);
+        StorageService.setActiveUser(null);
+        this.currentUser = null;
+
+        document.getElementById('auth-view').classList.add('hidden');
+        document.getElementById('app-view').classList.remove('hidden');
+
+        document.getElementById('desktop-host-nav-btn').classList.remove('hidden');
+        document.getElementById('desktop-host-nav-btn').classList.add('flex');
+        document.getElementById('mobile-host-nav-btn').classList.remove('hidden');
+        document.getElementById('mobile-host-nav-btn').classList.add('flex');
+
+        document.getElementById('header-avatar').innerHTML = SHIELD_SVG;
+        document.getElementById('header-nickname').textContent = 'Anfitrión';
+        document.getElementById('header-day-badge').textContent = 'Moderador';
+        document.getElementById('header-avatar-title').textContent = 'Control de Grupo y Premios';
+
+        this.updateHostBadges();
+        this.switchTab('host');
+      },
+
+      updateHostBadges() {
+        const unreadCount = StorageService.getHostNotifications().filter(n => n.unread).length;
+        const dBadge = document.getElementById('desktop-host-badge');
+        const mBadge = document.getElementById('mobile-host-badge');
+        if (unreadCount > 0) {
+          dBadge.textContent = unreadCount;
+          dBadge.classList.remove('hidden');
+          mBadge.textContent = unreadCount;
+          mBadge.classList.remove('hidden');
+        } else {
+          dBadge.classList.add('hidden');
+          mBadge.classList.add('hidden');
+        }
+      },
+
+      startCalendarWatcher() {
+        if (this.calendarWatcherId) clearInterval(this.calendarWatcherId);
+        this.calendarWatcherId = setInterval(() => {
+          if (this.currentUser) {
+            const prevShields = this.currentUser.shields;
+            const prevStreak = this.currentUser.streak;
+            this.currentUser = StorageService.syncCalendarAndShields(this.currentUser);
+            if (this.currentUser.shields !== prevShields || this.currentUser.streak !== prevStreak) {
+              this.renderHeaderAndMetrics();
+            }
+          }
+        }, 60000);
+      },
+
+      getAvatarById(id) {
+        return AVATARS.find(a => a.id === id) || AVATARS[0];
+      },
+
+      getAvailableAvatars() {
+        const usedIds = new Set(StorageService.getAllUsers().map(u => u.avatarId));
+        return AVATARS.filter(a => !usedIds.has(a.id));
+      },
+
+      renderAvatarSelector() {
+        const welcomeEmblem = document.getElementById('welcome-emblem');
+        if (welcomeEmblem) welcomeEmblem.innerHTML = WELCOME_LOGO_SVG;
+
+        const grid = document.getElementById('avatar-grid');
+        grid.innerHTML = '';
+
+        const availableAvatars = this.getAvailableAvatars();
+
+        if (availableAvatars.length === 0) {
+          grid.innerHTML = `<p class="col-span-full text-center text-xs font-semibold text-deepblue/65 py-6">Todos los emblemas ya están en uso.</p>`;
+          document.getElementById('selected-avatar-name').textContent = 'Sin disponibles';
+          return;
+        }
+
+        if (!availableAvatars.some(a => a.id === this.selectedAvatarId)) {
+          this.selectedAvatarId = availableAvatars[0].id;
+        }
+
+        const currentSelected = this.getAvatarById(this.selectedAvatarId);
+        document.getElementById('selected-avatar-name').textContent = currentSelected.name;
+
+        availableAvatars.forEach(avatar => {
+          const isSelected = avatar.id === this.selectedAvatarId;
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = `min-h-[78px] p-2.5 rounded-2xl flex flex-col items-center justify-center gap-1 transition ${
+            isSelected
+              ? 'bg-jade-soft ring-2 ring-jade scale-105 shadow-xs'
+              : 'bg-white hover:bg-cream'
+          }`;
+          btn.title = avatar.name;
+          btn.innerHTML = `
+            <div class="w-12 h-12">${avatar.svg}</div>
+            <span class="text-[10px] font-bold text-deepblue/80 leading-tight text-center line-clamp-1">${avatar.name}</span>
+          `;
+          btn.addEventListener('click', () => {
+            this.selectedAvatarId = avatar.id;
+            document.getElementById('selected-avatar-name').textContent = avatar.name;
+            this.renderAvatarSelector();
+          });
+          grid.appendChild(btn);
+        });
+      },
+
+      showAuthView(step = 'choice') {
+        document.getElementById('app-view').classList.add('hidden');
+        document.getElementById('auth-view').classList.remove('hidden');
+
+        document.getElementById('auth-choice-step').classList.add('hidden');
+        document.getElementById('login-form').classList.add('hidden');
+        document.getElementById('host-login-form').classList.add('hidden');
+        document.getElementById('register-step1-form').classList.add('hidden');
+        document.getElementById('register-step2-avatar').classList.add('hidden');
+
+        if (step === 'choice') {
+          document.getElementById('auth-choice-step').classList.remove('hidden');
+        } else if (step === 'login') {
+          const waLink = document.getElementById('btn-forgot-pin-wa');
+          if (waLink) waLink.href = getWhatsAppRecoveryUrl();
+          document.getElementById('login-form').classList.remove('hidden');
+          setTimeout(() => document.getElementById('login-name').focus(), 80);
+        } else if (step === 'host') {
+          document.getElementById('host-login-form').classList.remove('hidden');
+          setTimeout(() => document.getElementById('host-pin-input').focus(), 80);
+        } else if (step === 'register-1') {
+          document.getElementById('register-step1-form').classList.remove('hidden');
+          setTimeout(() => document.getElementById('reg-name').focus(), 80);
+        } else if (step === 'register-2') {
+          this.renderAvatarSelector();
+          document.getElementById('register-step2-avatar').classList.remove('hidden');
+        }
+      },
+
+      showAppView() {
+        StorageService.setHostSession(false);
+        document.getElementById('desktop-host-nav-btn').classList.add('hidden');
+        document.getElementById('desktop-host-nav-btn').classList.remove('flex');
+        document.getElementById('mobile-host-nav-btn').classList.add('hidden');
+        document.getElementById('mobile-host-nav-btn').classList.remove('flex');
+
+        document.getElementById('auth-view').classList.add('hidden');
+        document.getElementById('app-view').classList.remove('hidden');
+        if (this.activeTab === 'host') this.activeTab = 'board';
+        this.refreshAllUI();
+      },
+
+      refreshAllUI() {
+        if (!this.currentUser) return;
+        this.renderHeaderAndMetrics();
+        this.switchTab(this.activeTab);
+      },
+
+      renderHeaderAndMetrics() {
+        const user = this.currentUser;
+        if (!user) {
+          this.renderProgressTrack();
+          return;
+        }
+        const avatar = this.getAvatarById(user.avatarId);
+
+        document.getElementById('header-avatar').innerHTML = avatar.svg;
+        document.getElementById('header-nickname').textContent = user.nickname;
+        document.getElementById('header-avatar-title').textContent = avatar.name;
+
+        const daysCompleted = user.completedDays.length;
+        const nextDay = Math.min(60, daysCompleted + 1);
+        document.getElementById('header-day-badge').textContent = daysCompleted === 60 ? 'Meta 60' : `Día ${nextDay}`;
+
+        const chaptersCompleted = user.completedDays.reduce((sum, dayNum) => {
+          const dayObj = STUDY_PLAN_60_DAYS.find(d => d.day === dayNum);
+          return sum + (dayObj ? dayObj.chapters : 0);
+        }, 0);
+
+        const chaptersPct = Math.round((chaptersCompleted / 239) * 100);
+
+        const circumference = 2 * Math.PI * 26;
+        const offset = circumference - (chaptersPct / 100) * circumference;
+        const ringEl = document.getElementById('progress-ring-circle');
+        if (ringEl) {
+          ringEl.style.strokeDashoffset = offset;
+        }
+        document.getElementById('metric-chapters').textContent = chaptersCompleted;
+        document.getElementById('metric-chapters-pct').textContent = `${chaptersPct}%`;
+        document.getElementById('metric-days').textContent = daysCompleted;
+
+        const todayKey = CalendarSystem.getTodayKey();
+        const isLitToday = user.lastCompletedDate === todayKey && user.streak > 0;
+        const streakIconBox = document.getElementById('streak-icon-container');
+        const streakValText = document.getElementById('streak-value-text');
+        const streakStatusLbl = document.getElementById('streak-status-label');
+
+        streakIconBox.innerHTML = getFlameSvg(isLitToday);
+        streakIconBox.className = `w-14 h-14 rounded-2xl p-2 shrink-0 flex items-center justify-center transition-colors ${
+          isLitToday ? 'bg-amber-50' : 'bg-gray-100'
+        }`;
+        streakValText.className = `text-2xl font-extrabold leading-tight mt-0.5 ${
+          isLitToday ? 'text-terracotta' : 'text-gray-400'
+        }`;
+        document.getElementById('metric-streak').textContent = user.streak;
+        streakStatusLbl.textContent = isLitToday ? 'Encendida hoy' : 'Completa hoy para encender';
+
+        document.getElementById('shield-icon-container').innerHTML = SHIELD_SVG;
+        document.getElementById('metric-shields').textContent = user.shields;
+
+        this.renderProgressTrack();
+      },
+
+      renderProgressTrack() {
+        const markersContainer = document.getElementById('progress-track-markers');
+        const myFill = document.getElementById('my-track-fill');
+        if (!markersContainer) return;
+
+        markersContainer.innerHTML = '';
+        const allUsers = StorageService.getAllUsers();
+
+        allUsers.forEach((u, index) => {
+          const chCount = u.completedDays.reduce((sum, dayNum) => {
+            const dObj = STUDY_PLAN_60_DAYS.find(d => d.day === dayNum);
+            return sum + (dObj ? dObj.chapters : 0);
+          }, 0);
+          const pct = Math.min(100, Math.round((chCount / 239) * 100));
+          const isMe = this.currentUser && u.uid === this.currentUser.uid;
+          const av = this.getAvatarById(u.avatarId);
+
+          if (isMe && myFill) {
+            myFill.style.width = `${pct}%`;
+          }
+
+          const stackOffset = (index % 2) * 4;
+
+          const pin = document.createElement('div');
+          pin.style.left = `${pct}%`;
+          pin.style.bottom = `${stackOffset}px`;
+          pin.className = `absolute -translate-x-1/2 flex flex-col items-center transition-all duration-700 ${
+            isMe ? 'z-20' : 'z-10 opacity-90'
+          }`;
+          pin.title = `${u.nickname}: ${pct}% (${chCount}/239 cap.)`;
+
+          pin.innerHTML = `
+            <div class="w-8 h-8 rounded-full bg-white shadow-md p-1 ${
+              isMe ? 'ring-2 ring-jade scale-110' : 'ring-1 ring-gold/60'
+            }">
+              ${av.svg}
+            </div>
+            <div class="w-0.5 h-3.5 ${isMe ? 'bg-jade' : 'bg-gold'}"></div>
+          `;
+
+          markersContainer.appendChild(pin);
+        });
+      },
+
+      switchTab(tabName) {
+        this.activeTab = tabName;
+
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+        document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+
+        document.querySelectorAll('.nav-tab-btn').forEach(btn => {
+          if (btn.dataset.tab === tabName) {
+            btn.className = 'nav-tab-btn min-h-[42px] px-5 py-2 rounded-xl text-sm font-bold bg-warmbg text-jade transition flex items-center gap-2';
+          } else {
+            btn.className = 'nav-tab-btn min-h-[42px] px-5 py-2 rounded-xl text-sm font-semibold text-deepblue/60 hover:text-deepblue transition flex items-center gap-2';
+          }
+        });
+
+        document.querySelectorAll('.mobile-nav-btn').forEach(btn => {
+          const isHidden = btn.classList.contains('hidden');
+          if (btn.dataset.tab === tabName) {
+            btn.className = `mobile-nav-btn ${isHidden ? 'hidden' : 'flex'} flex-1 min-h-[52px] py-2 flex-col items-center justify-center gap-1 rounded-2xl bg-jade-soft text-jade transition`;
+          } else {
+            btn.className = `mobile-nav-btn ${isHidden ? 'hidden' : 'flex'} flex-1 min-h-[52px] py-2 flex-col items-center justify-center gap-1 rounded-2xl text-deepblue/55 transition`;
+          }
+        });
+
+        if (tabName === 'board') this.renderOpenJourneyBoard();
+        if (tabName === 'plan') this.renderStudyPlan();
+        if (tabName === 'journal') this.renderJournal();
+        if (tabName === 'host') this.renderHostDashboard();
+      },
+
+      renderHostDashboard() {
+        const summaryGrid = document.getElementById('host-players-summary');
+        const moderationList = document.getElementById('host-journal-moderation-list');
+        const notifList = document.getElementById('host-notifications-list');
+        const waInput = document.getElementById('host-wa-number-input');
+        if (waInput) {
+          waInput.value = StorageService.getRecoveryPhone();
+        }
+        if (!summaryGrid || !notifList) return;
+
+        const users = StorageService.getAllUsers();
+        if (users.length === 0) {
+          summaryGrid.innerHTML = `<div class="col-span-full clean-surface rounded-3xl p-6 text-center text-xs text-deepblue/65">Sin jugadores registrados.</div>`;
+        } else {
+          summaryGrid.innerHTML = users.map(u => {
+            const av = this.getAvatarById(u.avatarId);
+            const chCount = u.completedDays.reduce((s, d) => {
+              const found = STUDY_PLAN_60_DAYS.find(x => x.day === d);
+              return s + (found ? found.chapters : 0);
+            }, 0);
+            const pct = Math.round((chCount / 239) * 100);
+            return `
+              <div class="clean-surface rounded-3xl p-4 flex items-center gap-3.5">
+                <div class="w-12 h-12 rounded-2xl bg-warmbg p-1.5 shrink-0">${av.svg}</div>
+                <div class="min-w-0 flex-1">
+                  <div class="font-bold text-sm text-deepblue truncate">${escapeHtml(u.nickname)}</div>
+                  <div class="text-xs font-semibold text-jade mt-0.5">${u.completedDays.length}/60 días • ${pct}%</div>
+                  <div class="text-[11px] text-deepblue/55">Racha: ${u.streak} d • Premios cofre: ${u.chestWins || 0}</div>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+
+        if (moderationList) {
+          const allReflections = [];
+          users.forEach(u => {
+            const refs = u.reflections || {};
+            Object.keys(refs).forEach(dayKey => {
+              const r = refs[dayKey];
+              if (r && r.text) {
+                allReflections.push({
+                  uid: u.uid,
+                  nickname: u.nickname,
+                  avatarId: u.avatarId,
+                  dayNum: Number(dayKey),
+                  text: r.text,
+                  shared: Boolean(r.shared)
+                });
+              }
+            });
+          });
+
+          if (allReflections.length === 0) {
+            moderationList.innerHTML = `<div class="clean-surface rounded-3xl p-5 text-center text-xs text-deepblue/60">No hay entradas de bitácora.</div>`;
+          } else {
+            moderationList.innerHTML = '';
+            allReflections.forEach(item => {
+              const av = this.getAvatarById(item.avatarId);
+              const row = document.createElement('div');
+              row.className = 'clean-surface rounded-3xl p-4 flex items-start justify-between gap-3 bg-white';
+              row.innerHTML = `
+                <div class="flex items-start gap-3 min-w-0">
+                  <div class="w-9 h-9 rounded-xl bg-warmbg p-1 shrink-0">${av.svg}</div>
+                  <div class="min-w-0">
+                    <div class="flex items-center gap-2">
+                      <span class="font-bold text-xs text-deepblue">${escapeHtml(item.nickname)}</span>
+                      <span class="text-[11px] font-semibold text-jade">Día ${item.dayNum}</span>
+                    </div>
+                    <p class="text-xs text-deepblue/80 mt-1 break-words">"${escapeHtml(item.text)}"</p>
+                  </div>
+                </div>
+                <button type="button" class="btn-del-ref min-h-[36px] px-3 py-1.5 rounded-xl bg-terracotta-soft text-terracotta text-xs font-bold hover:bg-terracotta hover:text-white transition shrink-0">
+                  Borrar
+                </button>
+              `;
+              row.querySelector('.btn-del-ref').addEventListener('click', () => {
+                StorageService.deleteReflection(item.uid, item.dayNum);
+                this.renderHostDashboard();
+                showToast('Entrada eliminada.', 'terracotta');
+              });
+              moderationList.appendChild(row);
+            });
+          }
+        }
+
+        const notifications = StorageService.getHostNotifications();
+        if (notifications.length === 0) {
+          notifList.innerHTML = `<div class="clean-surface rounded-3xl p-6 text-center text-xs text-deepblue/65">Sin notificaciones todavía.</div>`;
+          return;
+        }
+
+        const badgeMap = {
+          lesson: { label: 'Lección', cls: 'bg-jade-soft text-jade-dark' },
+          chest_prize: { label: 'Premio Cofre', cls: 'bg-gold-soft text-gold-dark' },
+          ym_ring: { label: 'Anillo HJ', cls: 'bg-terracotta-soft text-terracotta' },
+          oil_vial: { label: 'Aceitero Final', cls: 'bg-deepblue-soft text-deepblue' }
+        };
+
+        notifList.innerHTML = notifications.map(n => {
+          const av = this.getAvatarById(n.playerAvatarId);
+          const badge = badgeMap[n.type] || badgeMap.lesson;
+          return `
+            <div class="clean-surface rounded-3xl p-4 sm:p-5 flex items-start justify-between gap-3 ${n.unread ? 'ring-2 ring-gold/60' : ''}">
+              <div class="flex items-start gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-warmbg p-1.5 shrink-0">${av.svg}</div>
+                <div>
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <span class="font-bold text-sm text-deepblue">${escapeHtml(n.playerNickname)}</span>
+                    <span class="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full ${badge.cls}">${badge.label}</span>
+                  </div>
+                  <p class="text-xs sm:text-sm text-deepblue/80 mt-1">${escapeHtml(n.message)}</p>
+                </div>
+              </div>
+              <span class="text-[11px] text-deepblue/45 shrink-0">${n.timestamp}</span>
+            </div>
+          `;
+        }).join('');
+      },
+
+      renderOpenJourneyBoard() {
+        const container = document.getElementById('open-journey-board');
+        if (!container) return;
+        container.innerHTML = '';
+
+        const completedList = this.currentUser ? this.currentUser.completedDays : [];
+        const allUsers = StorageService.getAllUsers();
+        const playerPositions = allUsers.map(u => {
+          const maxCompleted = u.completedDays.length > 0 ? Math.max(...u.completedDays) : 0;
+          const pos = maxCompleted === 0 ? 1 : Math.min(60, maxCompleted);
+          return {
+            ...u,
+            boardPos: pos,
+            isMe: this.currentUser && u.uid === this.currentUser.uid
+          };
+        });
+
+        const cols = 4;
+        const rows = [];
+        for (let i = 0; i < STUDY_PLAN_60_DAYS.length; i += cols) {
+          const slice = STUDY_PLAN_60_DAYS.slice(i, i + cols);
+          const rowIndex = Math.floor(i / cols);
+          rows.push({
+            items: rowIndex % 2 === 1 ? [...slice].reverse() : slice,
+            isReversed: rowIndex % 2 === 1,
+            rowIndex
+          });
+        }
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'space-y-8 sm:space-y-10 max-w-2xl mx-auto';
+
+        rows.forEach((rowObj, rIdx) => {
+          const rowEl = document.createElement('div');
+          rowEl.className = 'relative grid grid-cols-4 gap-3 sm:gap-6 items-center';
+
+          const lineBar = document.createElement('div');
+          lineBar.className = 'absolute left-[12.5%] right-[12.5%] top-1/2 -translate-y-1/2 h-1 bg-sand/70 rounded-full pointer-events-none';
+          rowEl.appendChild(lineBar);
+
+          if (rIdx < rows.length - 1) {
+            const turnConnector = document.createElement('div');
+            const sideClass = rowObj.isReversed ? 'left-[12.5%]' : 'right-[12.5%]';
+            turnConnector.className = `absolute ${sideClass} top-1/2 w-1 h-[calc(100%+2.25rem)] bg-sand/70 -translate-x-1/2 pointer-events-none`;
+            rowEl.appendChild(turnConnector);
+          }
+
+          rowObj.items.forEach(dayObj => {
+            const isCompleted = completedList.includes(dayObj.day);
+            const isCurrentNext = !isCompleted && (dayObj.day === (completedList.length + 1));
+            const playersHere = playerPositions.filter(p => p.boardPos === dayObj.day);
+
+            const cell = document.createElement('div');
+            cell.className = 'relative z-10 flex flex-col items-center';
+
+            let nodeStyle = 'bg-white text-deepblue shadow-sm hover:shadow-md';
+            if (isCompleted) {
+              nodeStyle = 'bg-jade text-white shadow-md shadow-jade/20';
+            } else if (isCurrentNext) {
+              nodeStyle = 'bg-gold text-white active-tile-pulse shadow-lg shadow-gold/30';
+            } else if (dayObj.prizeType || dayObj.milestone) {
+              nodeStyle = 'bg-terracotta-soft text-terracotta shadow-sm';
+            }
+
+            let playerBadgeHtml = '';
+            if (playersHere.length > 0) {
+              const topPlayer = playersHere.find(p => p.isMe) || playersHere[0];
+              const av = this.getAvatarById(topPlayer.avatarId);
+              playerBadgeHtml = `
+                <div class="absolute -top-3 -right-2 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white shadow-md p-1 ${
+                  topPlayer.isMe ? 'ring-2 ring-jade animate-float' : 'ring-1 ring-gold'
+                } z-20">
+                  ${av.svg}
+                </div>
+              `;
+            }
+
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = `relative w-14 h-14 sm:w-16 sm:h-16 rounded-full ${nodeStyle} flex flex-col items-center justify-center transition transform hover:scale-105 active:scale-95 focus:outline-none`;
+            btn.innerHTML = `
+              <span class="text-sm sm:text-base font-extrabold leading-none">${dayObj.day}</span>
+              ${dayObj.day === 1 ? '<span class="text-[8px] uppercase font-bold mt-0.5 opacity-80">Inicio</span>' : ''}
+              ${dayObj.prizeType === 'ym_ring' ? '<span class="text-[8px] uppercase font-bold mt-0.5">Anillo</span>' : ''}
+              ${dayObj.prizeType === 'oil_vial' ? '<span class="text-[8px] uppercase font-bold mt-0.5">Aceitero</span>' : ''}
+              ${playerBadgeHtml}
+            `;
+            btn.addEventListener('click', () => this.openTileModal(dayObj, playersHere));
+
+            cell.appendChild(btn);
+
+            if (dayObj.prizeType || dayObj.milestone) {
+              const tag = document.createElement('span');
+              tag.className = 'mt-1.5 text-[10px] font-bold text-deepblue/65 text-center leading-tight max-w-[90px] line-clamp-1';
+              tag.textContent = dayObj.prizeType === 'ym_ring'
+                ? 'Anillo HJ'
+                : (dayObj.prizeType === 'oil_vial' ? 'Aceitero' : dayObj.milestone);
+              cell.appendChild(tag);
+            }
+
+            rowEl.appendChild(cell);
+          });
+
+          wrapper.appendChild(rowEl);
+        });
+
+        container.appendChild(wrapper);
+      },
+
+      openTileModal(dayObj, playersHere) {
+        const completedList = this.currentUser ? this.currentUser.completedDays : [];
+        const isCompleted = completedList.includes(dayObj.day);
+        const nextAllowedDay = completedList.length + 1;
+        const isLocked = !isCompleted && dayObj.day > nextAllowedDay;
+
+        document.getElementById('tile-modal-badge').textContent = `Día ${dayObj.day}`;
+        document.getElementById('tile-modal-title').textContent = dayObj.label;
+        document.getElementById('tile-modal-context').textContent = dayObj.context;
+
+        const readLink = document.getElementById('tile-modal-read-link');
+        const gospelUrl = getGospelLibraryUrl(dayObj);
+        readLink.href = gospelUrl;
+        readLink.onclick = (e) => handleExternalLinkClick(e, gospelUrl, `Abriendo ${dayObj.label}`);
+
+        const prizeBox = document.getElementById('tile-modal-prize-box');
+        const prizeNameEl = document.getElementById('tile-modal-prize-name');
+        const viewPrizeBtn = document.getElementById('tile-modal-view-prize-btn');
+        if (dayObj.prizeType === 'ym_ring' || dayObj.prizeType === 'oil_vial') {
+          prizeBox.classList.remove('hidden');
+          prizeNameEl.textContent = dayObj.prizeType === 'ym_ring'
+            ? 'Anillo de Hombres Jóvenes'
+            : 'Aceitero Consagrado';
+          if (isCompleted) {
+            viewPrizeBtn.textContent = 'Visualizar';
+            viewPrizeBtn.className = 'min-h-[38px] px-3.5 py-1.5 rounded-xl bg-gold text-white text-xs font-bold hover:bg-gold-dark transition shrink-0';
+            viewPrizeBtn.onclick = () => {
+              document.getElementById('tile-detail-modal').classList.add('hidden');
+              this.showPrizeVisualModal(dayObj.prizeType, false);
+            };
+          } else {
+            viewPrizeBtn.textContent = 'Bloqueado';
+            viewPrizeBtn.className = 'min-h-[38px] px-3.5 py-1.5 rounded-xl bg-cream text-deepblue/45 text-xs font-bold cursor-not-allowed shrink-0';
+            viewPrizeBtn.onclick = () => showToast(`Completa el Día ${dayObj.day} para visualizar este premio.`, 'gold');
+          }
+        } else {
+          prizeBox.classList.add('hidden');
+        }
+
+        const playersBox = document.getElementById('tile-modal-players');
+        const playersList = document.getElementById('tile-modal-players-list');
+        if (playersHere.length > 0) {
+          playersBox.classList.remove('hidden');
+          playersList.innerHTML = playersHere.map(p => {
+            const av = this.getAvatarById(p.avatarId);
+            return `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-warmbg text-xs font-semibold">
+              <span class="w-4 h-4 inline-block">${av.svg}</span> ${escapeHtml(p.nickname)}
+            </span>`;
+          }).join('');
+        } else {
+          playersBox.classList.add('hidden');
+        }
+
+        const completeBtn = document.getElementById('tile-modal-complete-btn');
+        if (isCompleted) {
+          completeBtn.textContent = '✓ Completado';
+          completeBtn.className = 'flex-1 min-h-[48px] py-3 px-4 rounded-2xl bg-jade-soft text-jade-dark text-xs sm:text-sm font-bold flex items-center justify-center cursor-default';
+          completeBtn.onclick = null;
+        } else if (isLocked) {
+          completeBtn.textContent = `Completa el Día ${nextAllowedDay}`;
+          completeBtn.className = 'flex-1 min-h-[48px] py-3 px-4 rounded-2xl bg-cream text-deepblue/45 text-xs sm:text-sm font-bold flex items-center justify-center cursor-not-allowed';
+          completeBtn.onclick = () => showToast(`Debes completar primero el Día ${nextAllowedDay}.`, 'gold');
+        } else {
+          completeBtn.textContent = 'Completar Día';
+          completeBtn.className = 'flex-1 min-h-[48px] py-3 px-4 rounded-2xl bg-jade text-white text-xs sm:text-sm font-bold flex items-center justify-center hover:bg-jade-dark transition';
+          completeBtn.onclick = () => {
+            document.getElementById('tile-detail-modal').classList.add('hidden');
+            this.completeDay(dayObj.day);
+          };
+        }
+
+        document.getElementById('tile-detail-modal').classList.remove('hidden');
+      },
+
+      renderStudyPlan() {
+        const list = document.getElementById('study-plan-list');
+        list.innerHTML = '';
+
+        const completedList = this.currentUser ? this.currentUser.completedDays : [];
+        const filteredDays = STUDY_PLAN_60_DAYS.filter(d => {
+          const done = completedList.includes(d.day);
+          if (this.planFilter === 'completed') return done;
+          if (this.planFilter === 'pending') return !done;
+          return true;
+        });
+
+        if (filteredDays.length === 0) {
+          list.innerHTML = `
+            <div class="col-span-full text-center py-10 bg-white rounded-3xl shadow-xs">
+              <p class="text-sm font-semibold text-deepblue/70">No hay días en esta categoría.</p>
+            </div>
+          `;
+          return;
+        }
+
+        filteredDays.forEach(dayObj => {
+          const isCompleted = completedList.includes(dayObj.day);
+          const nextAllowedDay = completedList.length + 1;
+          const isLocked = !isCompleted && dayObj.day > nextAllowedDay;
+          const hasReflection = Boolean(this.currentUser && this.currentUser.reflections && this.currentUser.reflections[dayObj.day]);
+          const gospelUrl = getGospelLibraryUrl(dayObj);
+
+          const prizeLabel = dayObj.prizeType === 'ym_ring'
+            ? 'Anillo HJ'
+            : (dayObj.prizeType === 'oil_vial' ? 'Aceitero' : null);
+
+          const card = document.createElement('article');
+          card.className = `rounded-3xl p-5 sm:p-6 transition flex flex-col justify-between gap-4 ${
+            isCompleted
+              ? 'bg-jade-soft/45'
+              : 'clean-surface bg-white'
+          }`;
+
+          card.innerHTML = `
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-2">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span class="px-3 py-1 rounded-xl text-xs font-extrabold ${
+                    isCompleted ? 'bg-jade text-white' : 'bg-gold-soft text-gold-dark'
+                  }">Día ${dayObj.day}</span>
+                  <span class="text-xs font-semibold text-deepblue/50">${dayObj.chapters} cap.</span>
+                  ${prizeLabel ? `<span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-gold-soft text-gold-dark">Premio: ${prizeLabel}</span>` : ''}
+                  ${!prizeLabel && dayObj.milestone ? `<span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-terracotta-soft text-terracotta">${dayObj.milestone}</span>` : ''}
+                </div>
+                ${hasReflection ? '<span class="text-xs font-bold text-jade">✎ Nota</span>' : ''}
+              </div>
+
+              <h3 class="font-display font-bold text-base sm:text-lg text-deepblue">${dayObj.label}</h3>
+              <p class="text-xs sm:text-sm text-deepblue/70 mt-1.5 leading-relaxed">${dayObj.context}</p>
+            </div>
+
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 pt-1">
+              <a href="${gospelUrl}" target="_blank" rel="noopener noreferrer" data-read-day="${dayObj.day}"
+                class="flex-1 min-h-[48px] py-2.5 px-4 rounded-2xl bg-deepblue hover:bg-deepblue-light text-white text-xs sm:text-sm font-bold text-center transition flex items-center justify-center gap-2">
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                <span>Leer en Biblioteca</span>
+              </a>
+
+              <button type="button" data-complete-day="${dayObj.day}"
+                class="min-h-[48px] py-2.5 px-4 rounded-2xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 ${
+                  isCompleted
+                    ? 'bg-white text-jade shadow-xs hover:bg-jade-soft'
+                    : isLocked
+                      ? 'bg-cream text-deepblue/45 cursor-not-allowed'
+                      : 'bg-jade hover:bg-jade-dark text-white shadow-xs'
+                }">
+                ${isCompleted ? '✓ Completado' : (isLocked ? `Día ${nextAllowedDay} primero` : 'Marcar completado')}
+              </button>
+            </div>
+          `;
+
+          const readBtn = card.querySelector(`[data-read-day="${dayObj.day}"]`);
+          readBtn.addEventListener('click', (e) => {
+            handleExternalLinkClick(e, gospelUrl, `Abriendo ${dayObj.label}`);
+          });
+
+          const btn = card.querySelector(`[data-complete-day="${dayObj.day}"]`);
+          btn.addEventListener('click', () => {
+            if (isCompleted) {
+              this.openReflectionModal(dayObj.day);
+            } else if (isLocked) {
+              showToast(`Avanza día por día. Primero completa el Día ${nextAllowedDay}.`, 'gold');
+            } else {
+              this.completeDay(dayObj.day);
+            }
+          });
+
+          list.appendChild(card);
+        });
+      },
+
+      completeDay(dayNum) {
+        const user = this.currentUser;
+        if (!user) {
+          showToast('Estás en modo Anfitrión. Inicia sesión con una cuenta de jugador para marcar días.', 'gold');
+          return;
+        }
+        const dayObj = STUDY_PLAN_60_DAYS.find(d => d.day === dayNum);
+
+        const nextAllowedDay = user.completedDays.length + 1;
+        if (!user.completedDays.includes(dayNum) && dayNum !== nextAllowedDay) {
+          showToast(`No puedes adelantarte. Primero completa el Día ${nextAllowedDay}.`, 'gold');
+          return;
+        }
+
+        if (!user.completedDays.includes(dayNum)) {
+          user.completedDays.push(dayNum);
+          user.completedDays.sort((a, b) => a - b);
+
+          const today = CalendarSystem.getTodayKey();
+          const yesterday = CalendarSystem.getYesterdayKey();
+
+          if (user.lastCompletedDate === today) {
+            if (user.streak === 0) user.streak = 1;
+          } else if (user.lastCompletedDate === yesterday) {
+            user.streak += 1;
+          } else {
+            user.streak = 1;
+          }
+          user.lastCompletedDate = today;
+
+          StorageService.updateUser(user);
+          this.renderHeaderAndMetrics();
+          if (this.activeTab === 'board') this.renderOpenJourneyBoard();
+          if (this.activeTab === 'plan') this.renderStudyPlan();
+
+          StorageService.addHostNotification({
+            type: 'lesson',
+            playerNickname: user.nickname,
+            playerAvatarId: user.avatarId,
+            dayNum,
+            message: `Completó el Día ${dayNum} (${dayObj ? dayObj.label : ''}).`
+          });
+
+          showToast(`Día ${dayNum} completado. ¡Racha encendida!`, 'jade');
+
+          if (dayObj && dayObj.prizeType === 'ym_ring') {
+            StorageService.addHostNotification({
+              type: 'ym_ring',
+              playerNickname: user.nickname,
+              playerAvatarId: user.avatarId,
+              dayNum,
+              message: `¡Llegó a la mitad del Libro de Mormón (Día 30) y ganó un Anillo de Hombres Jóvenes!`
+            });
+            this.showPrizeVisualModal('ym_ring', true, () => this.openReflectionModal(dayNum));
+            return;
+          }
+
+          if (dayObj && dayObj.prizeType === 'oil_vial') {
+            StorageService.addHostNotification({
+              type: 'oil_vial',
+              playerNickname: user.nickname,
+              playerAvatarId: user.avatarId,
+              dayNum,
+              message: `¡Terminó todo el Libro de Mormón (Día 60) y ganó el Premio Final: un Aceitero!`
+            });
+            this.showPrizeVisualModal('oil_vial', true, () => this.openReflectionModal(dayNum));
+            return;
+          }
+
+          const maxChestWins = 4;
+          const currentWins = user.chestWins || 0;
+          if (currentWins < maxChestWins && Math.random() < 0.14) {
+            user.chestWins = currentWins + 1;
+            StorageService.updateUser(user);
+            this.openMysteryChestModal(dayNum, () => this.openReflectionModal(dayNum));
+            return;
+          }
+        }
+
+        this.openReflectionModal(dayNum);
+      },
+
+      showPrizeVisualModal(prizeType, justWon = false, onCloseCallback = null) {
+        const modal = document.getElementById('reward-modal');
+        const badge = document.getElementById('reward-badge');
+        const title = document.getElementById('reward-title');
+        const subtitle = document.getElementById('reward-subtitle');
+        const visualBox = document.getElementById('reward-visual-box');
+        const primaryBtn = document.getElementById('btn-reward-primary');
+        const closeBtn = document.getElementById('btn-reward-close');
+
+        const isRing = prizeType === 'ym_ring';
+        const prizeTitle = isRing ? 'Anillo de Hombres Jóvenes' : 'Aceitero Consagrado';
+        const prizeVisualHtml = isRing
+          ? (CUSTOM_PRIZE_IMAGES.ymRingUrl
+              ? `<img src="${CUSTOM_PRIZE_IMAGES.ymRingUrl}" alt="Anillo de Hombres Jóvenes" class="w-full h-full object-contain rounded-2xl">`
+              : REWARD_ASSETS.ymRingSvg)
+          : (CUSTOM_PRIZE_IMAGES.oilVialUrl
+              ? `<img src="${CUSTOM_PRIZE_IMAGES.oilVialUrl}" alt="Aceitero" class="w-full h-full object-contain rounded-2xl">`
+              : REWARD_ASSETS.oilVialSvg);
+
+        const encouragementText = isRing
+          ? '¡Felicidades! "Por medio de cosas pequeñas y sencillas se realizan grandes cosas" (Alma 37:6). Tu esfuerzo y constancia te permiten lograr tus metas; sigue esforzándote por lo que quieres, el Libro de Mormón siempre te guiará. Has ganado un premio.'
+          : '¡Felicidades! "Si perseverares hasta el fin, tendrás la vida eterna" (3 Nefi 15:9). Con esfuerzo y constancia lograste tu meta. Sigue esforzándote por lo que quieres, el Libro de Mormón siempre te servirá en tu vida. Has ganado un premio.';
+
+        if (justWon) {
+          badge.textContent = 'Recompensa Especial';
+          title.textContent = '¡Has ganado un premio!';
+          subtitle.textContent = encouragementText;
+          visualBox.innerHTML = REWARD_ASSETS.chestOpenPrize;
+
+          primaryBtn.textContent = 'Visualizar';
+          primaryBtn.classList.remove('hidden');
+          closeBtn.classList.add('hidden');
+
+          primaryBtn.onclick = () => {
+            primaryBtn.classList.add('hidden');
+            closeBtn.classList.remove('hidden');
+            badge.textContent = 'Premio Desbloqueado';
+            title.textContent = prizeTitle;
+            subtitle.textContent = 'El anfitrión ya recibió la notificación para entregarte tu premio.';
+            visualBox.innerHTML = prizeVisualHtml;
+          };
+        } else {
+          badge.textContent = 'Recompensa Especial';
+          title.textContent = prizeTitle;
+          subtitle.textContent = encouragementText;
+          visualBox.innerHTML = prizeVisualHtml;
+          primaryBtn.classList.add('hidden');
+          closeBtn.classList.remove('hidden');
+        }
+
+        closeBtn.onclick = () => {
+          modal.classList.add('hidden');
+          if (typeof onCloseCallback === 'function') onCloseCallback();
+        };
+
+        modal.classList.remove('hidden');
+      },
+
+      openMysteryChestModal(dayNum, onCloseCallback = null) {
+        const modal = document.getElementById('reward-modal');
+        const badge = document.getElementById('reward-badge');
+        const title = document.getElementById('reward-title');
+        const subtitle = document.getElementById('reward-subtitle');
+        const visualBox = document.getElementById('reward-visual-box');
+        const primaryBtn = document.getElementById('btn-reward-primary');
+        const closeBtn = document.getElementById('btn-reward-close');
+
+        badge.textContent = 'Cofre Sorpresa';
+        title.textContent = '¡Encontraste un cofre!';
+        subtitle.textContent = 'Toca para abrirlo.';
+        visualBox.innerHTML = REWARD_ASSETS.chestClosed;
+
+        primaryBtn.textContent = 'Abrir Cofre';
+        primaryBtn.classList.remove('hidden');
+        closeBtn.classList.add('hidden');
+
+        primaryBtn.onclick = () => {
+          primaryBtn.classList.add('hidden');
+          closeBtn.classList.remove('hidden');
+
+          badge.textContent = '¡Felicidades!';
+          title.textContent = '¡Te has ganado un premio!';
+          subtitle.textContent = 'El administrador recibió la notificación para entregártelo.';
+          visualBox.innerHTML = REWARD_ASSETS.chestOpenPrize;
+
+          StorageService.addHostNotification({
+            type: 'chest_prize',
+            playerNickname: this.currentUser.nickname,
+            playerAvatarId: this.currentUser.avatarId,
+            dayNum,
+            message: `¡Ganó un premio en un cofre al terminar el Día ${dayNum}!`
+          });
+        };
+
+        closeBtn.onclick = () => {
+          modal.classList.add('hidden');
+          if (typeof onCloseCallback === 'function') onCloseCallback();
+        };
+
+        modal.classList.remove('hidden');
+      },
+
+      openReflectionModal(dayNum) {
+        this.pendingReflectionDay = dayNum;
+        const dayObj = STUDY_PLAN_60_DAYS.find(d => d.day === dayNum);
+        const existing = (this.currentUser.reflections && this.currentUser.reflections[dayNum]) || null;
+
+        document.getElementById('modal-day-label').textContent = `Día ${dayNum} Completado`;
+        document.getElementById('modal-scripture-label').textContent = dayObj ? dayObj.label : '';
+        document.getElementById('reflection-textarea').value = existing ? existing.text : '';
+        document.getElementById('reflection-share-check').checked = existing ? existing.shared : false;
+
+        document.getElementById('reflection-modal').classList.remove('hidden');
+      },
+
+      saveCurrentReflection() {
+        const dayNum = this.pendingReflectionDay;
+        if (!dayNum) return;
+
+        const text = document.getElementById('reflection-textarea').value.trim();
+        const shared = document.getElementById('reflection-share-check').checked;
+
+        if (!this.currentUser.reflections) {
+          this.currentUser.reflections = {};
+        }
+
+        if (text.length > 0) {
+          this.currentUser.reflections[dayNum] = {
+            text,
+            shared,
+            date: new Date().toLocaleDateString('es-MX', { day: 'numeric', month: 'short' })
+          };
+          StorageService.updateUser(this.currentUser);
+          showToast('Reflexión guardada en tu bitácora.', 'jade');
+        }
+
+        document.getElementById('reflection-modal').classList.add('hidden');
+        this.pendingReflectionDay = null;
+        if (this.activeTab === 'plan') this.renderStudyPlan();
+        if (this.activeTab === 'journal') this.renderJournal();
+      },
+
+      renderJournal() {
+        const container = document.getElementById('journal-entries-list');
+        container.innerHTML = '';
+
+        if (this.journalFilter === 'mine') {
+          const reflections = this.currentUser.reflections || {};
+          const dayKeys = Object.keys(reflections).map(Number).sort((a, b) => b - a);
+
+          if (dayKeys.length === 0) {
+            container.innerHTML = `
+              <div class="clean-surface rounded-3xl p-8 text-center bg-white">
+                <p class="font-bold text-deepblue text-base">Aún no tienes notas guardadas</p>
+                <p class="text-xs sm:text-sm text-deepblue/65 mt-1 max-w-md mx-auto">Al completar una lectura en el Plan de Estudio podrás guardar tus impresiones aquí.</p>
+                <button type="button" onclick="App.switchTab('plan')" class="mt-4 min-h-[48px] px-6 py-2.5 rounded-2xl bg-jade text-white text-sm font-bold">Ir al Plan</button>
+              </div>
+            `;
+            return;
+          }
+
+          dayKeys.forEach(dayNum => {
+            const entry = reflections[dayNum];
+            const dayObj = STUDY_PLAN_60_DAYS.find(d => d.day === dayNum);
+
+            const card = document.createElement('div');
+            card.className = 'clean-surface rounded-3xl p-5 sm:p-6 bg-white space-y-3';
+            card.innerHTML = `
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <div class="flex items-center gap-2">
+                  <span class="px-3 py-1 rounded-xl bg-jade-soft text-jade-dark text-xs font-extrabold">Día ${dayNum}</span>
+                  <span class="font-display font-bold text-sm sm:text-base text-deepblue">${dayObj ? dayObj.label : ''}</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <button type="button" data-toggle-share="${dayNum}"
+                    class="min-h-[36px] px-3.5 py-1 rounded-full text-xs font-bold transition ${
+                      entry.shared
+                        ? 'bg-gold-soft text-gold-dark'
+                        : 'bg-warmbg text-deepblue/60 hover:text-deepblue'
+                    }">
+                    ${entry.shared ? 'Compartido' : 'Privado'}
+                  </button>
+                  <button type="button" data-edit-ref="${dayNum}" class="min-h-[36px] px-2.5 text-xs font-bold text-jade hover:underline">Editar</button>
+                </div>
+              </div>
+              <p class="text-sm text-deepblue/85 leading-relaxed whitespace-pre-line bg-warmbg p-4 rounded-2xl">"${escapeHtml(entry.text)}"</p>
+            `;
+
+            card.querySelector(`[data-toggle-share="${dayNum}"]`).addEventListener('click', () => {
+              this.currentUser.reflections[dayNum].shared = !this.currentUser.reflections[dayNum].shared;
+              StorageService.updateUser(this.currentUser);
+              this.renderJournal();
+              showToast(
+                this.currentUser.reflections[dayNum].shared
+                  ? 'Compartido en el Muro Comunitario.'
+                  : 'Marcado como privado.',
+                'gold'
+              );
+            });
+
+            card.querySelector(`[data-edit-ref="${dayNum}"]`).addEventListener('click', () => {
+              this.openReflectionModal(dayNum);
+            });
+
+            container.appendChild(card);
+          });
+        } else {
+          const allUsers = StorageService.getAllUsers();
+          const publicPosts = [];
+
+          allUsers.forEach(u => {
+            const refs = u.reflections || {};
+            Object.keys(refs).forEach(dayKey => {
+              const r = refs[dayKey];
+              if (r && r.shared && r.text) {
+                const dayNum = Number(dayKey);
+                const dayObj = STUDY_PLAN_60_DAYS.find(d => d.day === dayNum);
+                publicPosts.push({
+                  user: u,
+                  dayNum,
+                  dayLabel: dayObj ? dayObj.label : `Día ${dayNum}`,
+                  text: r.text,
+                  date: r.date || 'Reciente'
+                });
+              }
+            });
+          });
+
+          if (publicPosts.length === 0) {
+            container.innerHTML = `<div class="p-8 text-center bg-white rounded-3xl shadow-xs text-sm text-deepblue/65">Aún no hay reflexiones compartidas en el muro comunitario.</div>`;
+            return;
+          }
+
+          publicPosts.forEach(post => {
+            const av = this.getAvatarById(post.user.avatarId);
+            const card = document.createElement('div');
+            card.className = 'clean-surface rounded-3xl p-5 sm:p-6 bg-white space-y-3';
+            card.innerHTML = `
+              <div class="flex items-center justify-between gap-2">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-10 h-10 rounded-2xl bg-warmbg p-1.5">${av.svg}</div>
+                  <div>
+                    <div class="font-bold text-sm text-deepblue">${escapeHtml(post.user.nickname)}</div>
+                    <div class="text-xs font-semibold text-jade">Día ${post.dayNum} • ${post.dayLabel}</div>
+                  </div>
+                </div>
+                <span class="text-xs text-deepblue/45">${post.date}</span>
+              </div>
+              <p class="text-sm text-deepblue/85 leading-relaxed bg-warmbg p-4 rounded-2xl">"${escapeHtml(post.text)}"</p>
+            `;
+            container.appendChild(card);
+          });
+        }
+      },
+
+      bindGlobalEvents() {
+        document.getElementById('btn-go-login').addEventListener('click', () => this.showAuthView('login'));
+        document.getElementById('btn-go-register').addEventListener('click', () => this.showAuthView('register-1'));
+
+        document.querySelectorAll('.btn-back-choice').forEach(btn => {
+          btn.addEventListener('click', () => this.showAuthView('choice'));
+        });
+
+        document.getElementById('btn-back-step1').addEventListener('click', () => this.showAuthView('register-1'));
+
+        document.getElementById('host-login-form').addEventListener('submit', (e) => {
+          e.preventDefault();
+          const pin = document.getElementById('host-pin-input').value.trim();
+          if (!/^\d{4,6}$/.test(pin)) {
+            showToast('El código de anfitrión debe tener entre 4 y 6 números.', 'terracotta');
+            return;
+          }
+
+          const hostCfg = StorageService.getHostConfig();
+          if (!hostCfg) {
+            StorageService.saveHostPin(pin);
+            showToast('Código de anfitrión guardado en Firestore.', 'jade');
+            this.enterHostMode();
+          } else if (hostCfg.pin === pin) {
+            showToast('Bienvenido, Anfitrión.', 'jade');
+            this.enterHostMode();
+          } else {
+            showToast('Código de anfitrión incorrecto.', 'terracotta');
+          }
+        });
+
+        document.getElementById('btn-mark-host-read').addEventListener('click', () => {
+          StorageService.markAllHostNotificationsRead();
+          this.updateHostBadges();
+          this.renderHostDashboard();
+          showToast('Notificaciones marcadas como vistas.', 'jade');
+        });
+
+        document.getElementById('btn-save-host-wa').addEventListener('click', () => {
+          const input = document.getElementById('host-wa-number-input');
+          const digits = (input.value || '').replace(/\D/g, '');
+          if (digits.length < 10) {
+            showToast('Ingresa un número de WhatsApp válido (mínimo 10 dígitos).', 'terracotta');
+            return;
+          }
+          const saved = StorageService.saveRecoveryPhone(digits);
+          input.value = saved;
+          showToast('Número de WhatsApp actualizado.', 'jade');
+        });
+
+        const waForgotBtn = document.getElementById('btn-forgot-pin-wa');
+        waForgotBtn.href = getWhatsAppRecoveryUrl();
+        waForgotBtn.addEventListener('click', (e) => {
+          const url = getWhatsAppRecoveryUrl();
+          waForgotBtn.href = url;
+          handleExternalLinkClick(e, url, 'Abriendo WhatsApp');
+        });
+
+        document.getElementById('login-form').addEventListener('submit', (e) => {
+          e.preventDefault();
+          const identifier = document.getElementById('login-name').value.trim().toLowerCase();
+          const pin = document.getElementById('login-pin').value.trim();
+
+          const users = StorageService.getAllUsers();
+          const foundUser = users.find(u =>
+            (u.name.toLowerCase() === identifier || u.nickname.toLowerCase() === identifier) &&
+            u.pin === pin
+          );
+
+          if (foundUser) {
+            StorageService.setActiveUser(foundUser.uid);
+            this.currentUser = StorageService.getActiveUser();
+            e.target.reset();
+            this.showAppView();
+            showToast(`Bienvenido de nuevo, ${this.currentUser.nickname}.`, 'jade');
+          } else {
+            showToast('Nombre o PIN incorrectos. Verifica tus datos o crea una cuenta.', 'terracotta');
+          }
+        });
+
+        document.getElementById('register-step1-form').addEventListener('submit', (e) => {
+          e.preventDefault();
+          const name = document.getElementById('reg-name').value.trim();
+          const nickname = document.getElementById('reg-nickname').value.trim();
+          const pin = document.getElementById('reg-pin').value.trim();
+
+          if (!/^\d{4}$/.test(pin)) {
+            showToast('El código PIN debe tener 4 dígitos numéricos.', 'terracotta');
+            return;
+          }
+
+          this.tempRegistrationData = { name, nickname, pin };
+          this.showAuthView('register-2');
+        });
+
+        document.getElementById('btn-finish-register').addEventListener('click', () => {
+          if (!this.tempRegistrationData) {
+            this.showAuthView('register-1');
+            return;
+          }
+
+          const available = this.getAvailableAvatars();
+          if (available.length === 0 || !available.some(a => a.id === this.selectedAvatarId)) {
+            showToast('Este icono ya fue elegido. Selecciona otro disponible.', 'terracotta');
+            this.renderAvatarSelector();
+            return;
+          }
+
+          this.currentUser = StorageService.createUser({
+            ...this.tempRegistrationData,
+            avatarId: this.selectedAvatarId
+          });
+
+          this.tempRegistrationData = null;
+          document.getElementById('register-step1-form').reset();
+          this.showAppView();
+          showToast(`¡Cuenta creada! Bienvenido, ${this.currentUser.nickname}.`, 'jade');
+        });
+
+        document.getElementById('switch-user-btn').addEventListener('click', () => {
+          StorageService.setActiveUser(null);
+          StorageService.setHostSession(false);
+          this.currentUser = null;
+          this.showAuthView('choice');
+        });
+
+        document.querySelectorAll('[data-tab]').forEach(btn => {
+          btn.addEventListener('click', () => this.switchTab(btn.dataset.tab));
+        });
+
+        document.querySelectorAll('.plan-filter-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            this.planFilter = btn.dataset.filter;
+            document.querySelectorAll('.plan-filter-btn').forEach(b => {
+              b.className = b === btn
+                ? 'plan-filter-btn min-h-[40px] px-4 py-1.5 rounded-xl text-xs font-bold bg-warmbg text-deepblue'
+                : 'plan-filter-btn min-h-[40px] px-4 py-1.5 rounded-xl text-xs font-semibold text-deepblue/60';
+            });
+            this.renderStudyPlan();
+          });
+        });
+
+        document.querySelectorAll('.journal-filter-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            this.journalFilter = btn.dataset.jfilter;
+            document.querySelectorAll('.journal-filter-btn').forEach(b => {
+              b.className = b === btn
+                ? 'journal-filter-btn min-h-[40px] px-4 py-1.5 rounded-xl text-xs font-bold bg-warmbg text-deepblue'
+                : 'journal-filter-btn min-h-[40px] px-4 py-1.5 rounded-xl text-xs font-semibold text-deepblue/60';
+            });
+            this.renderJournal();
+          });
+        });
+
+        document.getElementById('save-reflection-btn').addEventListener('click', () => this.saveCurrentReflection());
+        document.getElementById('skip-reflection-btn').addEventListener('click', () => {
+          document.getElementById('reflection-modal').classList.add('hidden');
+          this.pendingReflectionDay = null;
+        });
+
+        document.getElementById('close-tile-modal').addEventListener('click', () => {
+          document.getElementById('tile-detail-modal').classList.add('hidden');
+        });
+      }
+    };
+
+    window.App = App;
+
+    function showToast(message, tone = 'jade') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      const colors = {
+        jade: 'bg-deepblue text-white border-l-4 border-jade',
+        gold: 'bg-deepblue text-white border-l-4 border-gold',
+        terracotta: 'bg-deepblue text-white border-l-4 border-terracotta'
+      };
+      toast.className = `${colors[tone] || colors.jade} px-4 py-3.5 rounded-2xl shadow-xl text-xs sm:text-sm font-semibold pointer-events-auto transition-all duration-300 transform translate-y-0`;
+      toast.textContent = message;
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(-8px)';
+        setTimeout(() => toast.remove(), 300);
+      }, 3400);
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      App.init();
+    });
+  </script>
+</body>
+</html>
